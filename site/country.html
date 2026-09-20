@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Country Story — AgriSentinel</title>
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=17">
+<script src="plotly.min.js"></script>
+<script src="agrisentinel_data.js"></script>
+<script src="agrisentinel.js?v=17"></script>
+</head>
+<body>
+<script>asNav('country.html',false)</script>
+
+<div class="pagehead">
+  <img class="bgart" src="assets/market.svg" alt="">
+  <div class="wrap">
+    <div class="eyebrow" style="color:#FFD86B">Country Story</div>
+    <h1>What happened, 2010–2023</h1>
+    <p>The recorded history for one country. Forecasts live on the Forecast page.</p>
+  </div>
+</div>
+
+<section>
+  <div class="wrap">
+    <div class="card rv">
+      <!-- both pickers on one row; the indicator one is labelled "Chart" because
+           it changes ONLY the chart — the badge, story and tier strip stay
+           hunger-based whatever is selected here. -->
+      <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap">
+        <select id="cSearch" style="flex:1;min-width:240px"></select>
+        <label style="display:flex;align-items:center;gap:.55rem;flex:none">
+          <span class="ctl-l">Chart</span>
+          <select id="cMetric" style="width:190px"></select>
+        </label>
+      </div>
+
+      <div id="cStory" style="margin-top:1.7rem"></div>
+      <div id="cChart" style="height:300px;margin-top:1.4rem"></div>
+
+      <div id="cStrip" style="margin-top:1.6rem;padding-top:1.2rem;
+           border-top:1px solid var(--line);line-height:2.4"></div>
+    </div>
+
+    <div class="card rv d1" style="margin-top:2rem">
+      <div id="cOutlook"></div>
+    </div>
+  </div>
+</section>
+
+<script>asFooter()</script>
+<script>
+// ---- Country Story = the recorded past only. Everything predictive (risk tier,
+// direction, indicator forecasts, SHAP) lives on forecast.html, so a reader is
+// never guessing whether a number is history or a projection.
+const cSel=document.getElementById('cSearch');
+ISOs.map(i=>AS.META[i].n).sort().forEach(n=>{
+ const o=document.createElement('option');o.value=n;o.textContent=n;cSel.appendChild(o);});
+const mSel=document.getElementById('cMetric');
+['pou','gdp_per_capita','inflation_cpi','des_adequacy','pop_growth'].forEach(k=>{
+ const o=document.createElement('option');o.value=k;o.textContent=LBL[k];mSel.appendChild(o);});
+
+function showCountry(name){const iso=name2iso[name];if(!iso)return;
+ const s=AS.SERIES[iso],m=AS.META[iso],k=mSel.value;
+ const first=s.pou.find(v=>v!=null),last=[...s.pou].reverse().find(v=>v!=null);
+ // a flat series must not read as "rose" — report the change honestly
+ const delta=+(last-first).toFixed(1);
+ const moved=Math.abs(delta)>=0.1;
+ // a flat series must read as "changed little", never as "improved"/"worsened"
+ const verb=moved?(delta<0?'improved':'worsened'):'changed little';
+ let peakY=s.y[0],peak=-1;s.pou.forEach((v,i)=>{if(v!=null&&v>peak){peak=v;peakY=s.y[i]}});
+ const lt=[...s.tier].reverse().find(v=>v);
+ const TIERWORD={Low:'food access broadly secure',Medium:'vulnerable to shocks',
+                 High:'serious hunger'};
+ document.getElementById('cStory').innerHTML=
+  `<h2 style="font-size:1.75rem">${m.n}
+     <span class="badge" style="background:${TC[lt]||'#888'};vertical-align:middle;
+       font-size:.78rem">${lt} &mdash; ${TIERWORD[lt]||''}</span></h2>
+   <div class="explain"><b>${m.n}'s story:</b> hunger has <b>${verb}</b> since
+     ${AS.GLOB.years[0]} (${first}% &rarr; ${last}%). Hardest year: <b>${peakY}</b>.
+     Region: ${m.r} (${m.g}).</div>`;
+ const regAvg=AS.GLOB.years.map(y=>{let sum=0,n=0;ISOs.forEach(c=>{if(AS.META[c].r===m.r){
+  const i=AS.SERIES[c].y.indexOf(y);if(i>-1&&AS.SERIES[c][k]&&AS.SERIES[c][k][i]!=null){sum+=AS.SERIES[c][k][i];n++;}}});
+  return n?sum/n:null;});
+ Plotly.react('cChart',[{x:s.y,y:s[k],name:m.n,mode:'lines+markers',line:{color:'#175487',width:3}},
+  {x:AS.GLOB.years,y:regAvg,name:m.r+' average',line:{color:'#9AA8B5',width:2,dash:'dot'}}],
+  {...LAYOUT,yaxis:{title:LBL[k]},legend:{orientation:'h',y:1.12},
+   shapes:[2020,2022].filter(x=>AS.GLOB.years.includes(x)).map(x=>({type:'line',x0:x,x1:x,y0:0,y1:1,yref:'paper',
+    line:{color:TC.High,dash:'dash',width:1}}))},PLOTCFG);
+ document.getElementById('cStrip').innerHTML=
+  '<div style="display:flex;gap:1rem;align-items:baseline;flex-wrap:wrap;margin-bottom:.7rem">'+
+   '<b style="font-size:.95rem;font-family:var(--sans)">Risk tier, year by year</b>'+
+   '<span style="font-size:.8rem;color:var(--muted)">'+
+    'Low &lt;5% · Medium 5&ndash;15% · High 15%+</span></div>'+
+  s.y.map((y,i)=>s.tier[i]?`<span class="badge" style="background:${TC[s.tier[i]]};font-size:.72rem;margin:2px">${y}</span>`:'').join('');
+
+ // hand the selected country to the Forecast page rather than repeating its content here
+ document.getElementById('cOutlook').innerHTML=
+  `<h3 style="font-family:var(--sans);font-size:1.02rem;margin:0 0 .3rem">What happens next?</h3>
+   <div style="color:var(--muted);font-size:.88rem;margin-bottom:1rem">
+     ${NEXT_YEAR} risk tier, direction of change, indicator forecasts to ${TARGET_YEAR},
+     and the reasons behind each one.</div>
+   <a class="btn btn-blue" href="forecast.html?c=${iso}">See ${m.n}'s forecast &rarr;</a>`;}
+
+cSel.onchange=e=>showCountry(e.target.value);
+mSel.onchange=()=>showCountry(cSel.value);
+const qc=new URLSearchParams(location.search).get('c');
+const start=(qc&&AS.META[qc])?AS.META[qc].n:(name2iso['Myanmar']?'Myanmar':cSel.options[0].value);
+cSel.value=start;showCountry(start);
+</script>
+</body>
+</html>

@@ -1,0 +1,4 @@
+# Netlify config — AgriSentinel static site (no build step; publish the site/ folder)
+[build]
+  publish = "site"
+  command = ""

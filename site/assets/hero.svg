@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+<defs>
+<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+ <stop offset="0" stop-color="#082A47"/><stop offset=".45" stop-color="#0F5FA8"/>
+ <stop offset=".78" stop-color="#2E86B8"/><stop offset="1" stop-color="#E8B84B"/>
+</linearGradient>
+<radialGradient id="sun" cx=".5" cy=".5" r=".5">
+ <stop offset="0" stop-color="#FFF3C4"/><stop offset=".35" stop-color="#FFD86B"/>
+ <stop offset="1" stop-color="#FFD86B" stop-opacity="0"/>
+</radialGradient>
+<linearGradient id="hill1" x1="0" y1="0" x2="0" y2="1">
+ <stop offset="0" stop-color="#C89A2E"/><stop offset="1" stop-color="#8F6A1B"/>
+</linearGradient>
+<linearGradient id="hill2" x1="0" y1="0" x2="0" y2="1">
+ <stop offset="0" stop-color="#E0B245"/><stop offset="1" stop-color="#B08428"/>
+</linearGradient>
+<linearGradient id="hill3" x1="0" y1="0" x2="0" y2="1">
+ <stop offset="0" stop-color="#F2CB60"/><stop offset="1" stop-color="#C89A2E"/>
+</linearGradient>
+<filter id="soft"><feGaussianBlur stdDeviation="4"/></filter>
+<g id="stalk">
+ <path d="M0,0 Q4,-60 2,-120" stroke="#5C4310" stroke-width="4" fill="none"/>
+ <ellipse cx="0" cy="-118" rx="7" ry="16" fill="#6B4F12"/>
+ <ellipse cx="-8" cy="-104" rx="6" ry="13" fill="#7A5B15" transform="rotate(-24 -8 -104)"/>
+ <ellipse cx="10" cy="-102" rx="6" ry="13" fill="#7A5B15" transform="rotate(24 10 -102)"/>
+ <ellipse cx="-9" cy="-86" rx="6" ry="12" fill="#6B4F12" transform="rotate(-26 -9 -86)"/>
+ <ellipse cx="11" cy="-84" rx="6" ry="12" fill="#6B4F12" transform="rotate(26 11 -84)"/>
+</g>
+</defs>
+
+<rect width="1920" height="1080" fill="url(#sky)"/>
+<circle cx="1310" cy="620" r="420" fill="url(#sun)"/>
+<circle cx="1310" cy="620" r="130" fill="#FFE9A8" opacity=".95"/>
+
+<!-- distant birds -->
+<g stroke="#0B3D6E" stroke-width="5" fill="none" opacity=".7" stroke-linecap="round">
+ <path d="M540,300 q18,-16 36,0 q18,-16 36,0"/>
+ <path d="M660,255 q14,-12 28,0 q14,-12 28,0"/>
+ <path d="M470,370 q11,-10 22,0 q11,-10 22,0"/>
+</g>
+
+<!-- rolling field hills -->
+<path d="M0,760 C300,690 560,820 900,760 C1240,700 1520,810 1920,740 L1920,1080 L0,1080 Z" fill="url(#hill1)"/>
+<path d="M0,830 C360,770 700,890 1040,830 C1380,775 1620,880 1920,820 L1920,1080 L0,1080 Z" fill="url(#hill2)"/>
+<path d="M0,920 C420,860 820,975 1220,915 C1520,872 1740,950 1920,905 L1920,1080 L0,1080 Z" fill="url(#hill3)"/>
+
+<!-- harvest furrow lines -->
+<g stroke="#8F6A1B" stroke-width="3" opacity=".35" fill="none">
+ <path d="M0,965 C480,905 980,1015 1920,948"/>
+ <path d="M0,1005 C520,950 1020,1050 1920,990"/>
+ <path d="M0,1045 C560,995 1060,1080 1920,1030"/>
+</g>
+
+<!-- foreground wheat -->
+<g filter="url(#soft)" opacity=".9">
+ <use href="#stalk" transform="translate(120,1080) scale(1.35)"/>
+ <use href="#stalk" transform="translate(210,1080) scale(1.6) rotate(4)"/>
+ <use href="#stalk" transform="translate(320,1080) scale(1.2) rotate(-5)"/>
+ <use href="#stalk" transform="translate(1620,1080) scale(1.5) rotate(-4)"/>
+ <use href="#stalk" transform="translate(1730,1080) scale(1.75) rotate(5)"/>
+ <use href="#stalk" transform="translate(1840,1080) scale(1.3)"/>
+</g>
+<g opacity=".95">
+ <use href="#stalk" transform="translate(70,1080) scale(1.8) rotate(-6)"/>
+ <use href="#stalk" transform="translate(260,1080) scale(2) rotate(3)"/>
+ <use href="#stalk" transform="translate(1680,1080) scale(2.1) rotate(-3)"/>
+ <use href="#stalk" transform="translate(1880,1080) scale(1.9) rotate(6)"/>
+</g>
+
+<!-- floating grain particles -->
+<g fill="#FFE9A8">
+ <circle cx="420" cy="620" r="4" opacity=".8"/><circle cx="530" cy="540" r="3" opacity=".6"/>
+ <circle cx="820" cy="580" r="3.5" opacity=".7"/><circle cx="1120" cy="500" r="3" opacity=".55"/>
+ <circle cx="1490" cy="430" r="4" opacity=".7"/><circle cx="960" cy="660" r="2.5" opacity=".5"/>
+</g>
+</svg>

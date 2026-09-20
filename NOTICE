@@ -1,0 +1,33 @@
+AgriSentinel — third-party data notice
+======================================
+
+The MIT License in LICENSE covers the source code in this repository. It does
+NOT cover the datasets redistributed under data/raw/, which remain the property
+of their publishers and are included here only so that the analysis reproduces
+from a fresh clone.
+
+FAOSTAT Food Security and Nutrition Indicators
+  Publisher : Food and Agriculture Organization of the United Nations (FAO)
+  Source    : https://www.fao.org/faostat/en/#data/FS
+  Licence   : CC BY-NC-SA 3.0 IGO
+              https://creativecommons.org/licenses/by-nc-sa/3.0/igo/
+  Used for  : prevalence of undernourishment, dietary energy supply adequacy,
+              cereal import dependency ratio, food production variability
+  Snapshot  : data/raw/faostat/2026-07-28/ (see manifest.json)
+
+World Bank World Development Indicators
+  Publisher : The World Bank
+  Source    : https://data.worldbank.org/
+  Licence   : CC BY 4.0
+              https://creativecommons.org/licenses/by/4.0/
+  Used for  : GDP per capita, GDP growth, inflation (CPI), population growth,
+              and the country region / income-group classification
+  Snapshot  : data/raw/worldbank/2026-07-28/ (see manifest.json)
+
+The CC BY-NC-SA 3.0 IGO licence on the FAOSTAT data is non-commercial and
+share-alike. Anyone reusing the data in this repository, or results derived
+directly from it, should honour those terms and cite the original publishers
+rather than this repository alone.
+
+Neither FAO nor the World Bank endorses this project or is responsible for any
+conclusions drawn from their data here.

@@ -1,0 +1,44 @@
+{
+  "source_url": "https://api.worldbank.org/v2/en/indicator/{code}?downloadformat=csv",
+  "retrieved_at": "2026-07-28T05:38:46.128872+00:00",
+  "files": {
+    "wb_gdp_per_capita.csv": {
+      "sha256": "0c5e3d171aa1ff0e84de833e142f1374e30d4641f39b71f75eb435225041cfb9",
+      "bytes": 306168
+    },
+    "country_classification.csv": {
+      "sha256": "680cad985ce0ecc10c6da6c6d660b7547cf627ba984a65bfd28b17fcd6bb8c28",
+      "bytes": 64528
+    },
+    "wb_gdp_growth.csv": {
+      "sha256": "306e37d4c6fdb0697ddfe17697ca06308c97f86beb42324d4def8be957841bc7",
+      "bytes": 301969
+    },
+    "wb_inflation_cpi.csv": {
+      "sha256": "d471d84cc4a1f3a79d46742b79fb23ebced68c1c7efa03aed9392f40292b495c",
+      "bytes": 258144
+    },
+    "wb_pop_growth.csv": {
+      "sha256": "c01c8913615cba43fe812c86cc5a06bacece3845f89d0e480d09cb7a9bb64aff",
+      "bytes": 350696
+    }
+  },
+  "shapes": {
+    "gdp_per_capita": [
+      265,
+      71
+    ],
+    "gdp_growth": [
+      265,
+      71
+    ],
+    "inflation_cpi": [
+      265,
+      71
+    ],
+    "pop_growth": [
+      265,
+      71
+    ]
+  }
+}

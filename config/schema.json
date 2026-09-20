@@ -1,0 +1,39 @@
+{
+  "_comment": "Language-agnostic mirror of config/paths.py. Any non-Python consumer (JS build step, docs generator) reads THIS, never a hand-typed path. tests/test_dashboard_contract.py checks these two files stay in sync.",
+  "data": {
+    "raw": { "faostat": "data/raw/faostat", "worldbank": "data/raw/worldbank" },
+    "interim": "data/interim",
+    "processed": {
+      "master_dataset": "data/processed/master_dataset.csv",
+      "features_1yr": "data/processed/features_lagged_1yr.csv",
+      "features_5yr": "data/processed/features_lagged_5yr.csv",
+      "transactions_apriori": "data/processed/transactions_apriori.csv",
+      "features_demo_latest": "data/processed/features_demo_latest.csv"
+    }
+  },
+  "models_dir": "models",
+  "reports": {
+    "figures": "reports/figures",
+    "metrics": {
+      "metrics": "reports/metrics/metrics.json",
+      "data_statistics": "reports/metrics/data_statistics.json",
+      "forecast_metrics": "reports/metrics/forecast_metrics.json",
+      "rules": "reports/metrics/rules.json",
+      "shap": "reports/metrics/shap.json",
+      "direction_metrics": "reports/metrics/direction_metrics.json"
+    }
+  },
+  "site": {
+    "dir": "site",
+    "dashboard_data": "site/agrisentinel_data.js",
+    "pages": ["index.html", "explore.html", "country.html", "forecast.html", "modellab.html", "lab.html", "learn.html"]
+  },
+  "notebook": "notebooks/agrisentinel_pipeline.ipynb",
+  "run_parameters": {
+    "year_min": 2010,
+    "year_max": 2023,
+    "horizons": ["1yr", "5yr"],
+    "tasks": ["tier", "value", "direction", "forecast"],
+    "indicators": ["pou", "gdp_per_capita", "inflation_cpi", "des_adequacy", "pop_growth"]
+  }
+}

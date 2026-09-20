@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Learn — AgriSentinel</title>
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=17">
+<script src="agrisentinel_data.js"></script>
+<script src="agrisentinel.js?v=17"></script>
+</head>
+<body>
+<script>asNav('learn.html',false)</script>
+
+<div class="pagehead">
+  <img class="bgart" src="assets/hero.svg" alt="">
+  <div class="wrap">
+    <div class="eyebrow" style="color:#FFD86B">Learn More</div>
+    <h1>Understand food security</h1>
+    <p>The concepts behind the numbers, official sources, videos from UN agencies —
+       and honest answers about our methods.</p>
+  </div>
+</div>
+
+<section>
+  <div class="wrap">
+    <div class="center rv">
+      <div class="eyebrow">Watch &amp; Understand</div>
+      <h2>From the UN and the world's food agencies</h2>
+      <p>Official channels — each opens on YouTube in a new tab (no broken embeds, ever).</p>
+    </div>
+    <div class="vids">
+      <a class="vid rv" href="https://www.youtube.com/@unitednations/search?query=food%20security" target="_blank"
+         style="background:linear-gradient(135deg,#0E2A44,#175487)">
+         <img class="vthumb" src="assets/earth.svg" alt=""><small>UNITED NATIONS</small>
+         <div class="play"></div><b>UN — Food security &amp; SDG 2 Zero Hunger</b></a>
+      <a class="vid rv d1" href="https://www.youtube.com/@UNFAO/search?query=state%20of%20food%20security" target="_blank"
+         style="background:linear-gradient(135deg,#1A9E77,#175487)">
+         <img class="vthumb" src="assets/market.svg" alt=""><small>FAO</small>
+         <div class="play"></div><b>FAO — The State of Food Security (SOFI)</b></a>
+      <a class="vid rv d2" href="https://www.youtube.com/@WorldFoodProgramme/search?query=hunger%20crisis" target="_blank"
+         style="background:linear-gradient(135deg,#E6A817,#D64550)">
+         <img class="vthumb" src="assets/hero.svg" alt=""><small>WFP</small>
+         <div class="play"></div><b>World Food Programme — Global hunger crisis</b></a>
+    </div>
+  </div>
+</section>
+
+<section style="background:var(--mist)">
+  <div class="wrap">
+    <div class="center rv">
+      <div class="eyebrow">Open Data</div>
+      <h2>Built entirely on open sources</h2>
+      <p>Every number on this platform can be traced to an official, freely downloadable source.</p>
+    </div>
+    <div class="res rv d1">
+      <a href="https://www.fao.org/faostat/en/#data/FS" target="_blank"><b>FAOSTAT — Food Security Indicators</b>
+        <span>The primary dataset: undernourishment, dietary supply, import dependence. Free bulk CSV.</span></a>
+      <a href="https://data.worldbank.org" target="_blank"><b>World Bank Open Data</b>
+        <span>GDP per capita, growth, inflation and population — the economic features.</span></a>
+      <a href="https://www.fao.org/publications/sofi" target="_blank"><b>SOFI Report</b>
+        <span>FAO's flagship annual report — the professional benchmark for this topic.</span></a>
+      <a href="https://www.wfp.org/global-hunger-crisis" target="_blank"><b>WFP — Global Hunger Crisis</b>
+        <span>Live overview of hunger hotspots from the World Food Programme.</span></a>
+      <a href="https://sdgs.un.org/goals/goal2" target="_blank"><b>UN SDG 2 — Zero Hunger</b>
+        <span>The global goal this project's indicator (SDG 2.1.1) belongs to.</span></a>
+      <a href="https://ourworldindata.org/hunger-and-undernourishment" target="_blank"><b>Our World in Data — Hunger</b>
+        <span>Accessible charts and context on global undernourishment trends.</span></a>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap" style="max-width:840px">
+    <div class="center rv">
+      <div class="eyebrow">Questions</div>
+      <h2>Honest answers</h2>
+    </div>
+    <div class="rv d1" id="faqWrap"></div>
+  </div>
+</section>
+
+<div class="band" style="min-height:44vh">
+  <img src="assets/earth.svg" alt="">
+  <div class="q rv">
+    <h2>Ready to explore?</h2>
+    <p style="margin-bottom:2rem">Start with the world map, or jump straight to a country you care about.</p>
+    <a class="btn btn-solid" href="explore.html">World map →</a>
+    <a class="btn btn-ghost" href="country.html">Country story →</a>
+  </div>
+</div>
+
+<script>asFooter()</script>
+<script>
+(function(){
+ const rf1=AS.METRICS.find(m=>m.horizon==='1yr'&&m.model==='Random Forest'&&m.split==='test');
+ const dm1=(AS.DIRMETRICS||[]).find(d=>d.horizon==='1yr');
+ const faqs=[
+  ['What exactly is "hunger level" here?',
+   `The Prevalence of Undernourishment (PoU) — the share of people whose daily food intake falls short of
+    energy requirements. It is <b>UN SDG Indicator 2.1.1</b>, estimated and published by FAO with a consistent
+    method across all countries and years.`],
+  ['How accurate are the forecasts?',
+   `On unseen years our best models reach ${Math.round(rf1.accuracy*100)}% accuracy and ${rf1.macro_f1} macro-F1.
+    Crucially, <b>no high-risk country was ever misclassified as low-risk</b> — the worst kind of error for an
+    early-warning system never occurred in testing.`],
+  ['Risk tiers rarely change — so what does the model add?',
+   `True: most countries keep their tier from one year to the next, so "same as last year" is a strong
+    guess. The model's real value is the <b>explanation</b> — SHAP shows which pressures are building in each
+    country, which a naive guess can never do.`],
+  ['Is the data up to date?',
+   `FAO releases finalized data with a 1–2 year lag, so the panel ends in ${AS.GLOB.latest_year} and forecasts ${NEXT_YEAR}.
+    The pipeline is fully retrainable: when new data drops, one script refresh updates everything.`],
+  [`Where do the ${NEXT_YEAR} and ${TARGET_YEAR} indicator forecasts come from?`,
+   `From trained Random Forest regression models — one per indicator per horizon, using the same
+    leakage-safe chronological splits as the tier models. Slow-moving indicators (hunger, income, food supply)
+    are reliable on unseen years; volatile ones are flagged honestly — inflation cannot be
+    forecast five years ahead, and the site says so.`],
+  ['Can the model predict whether things will get better or worse?',
+   `That is the hardest question, and we test it directly: a third task predicts the <b>direction</b> of change
+    (improving / stable / worsening)${dm1?` — macro-F1 ${dm1.macro_f1} vs baseline ${dm1.baseline_macro_f1}`:''}.
+    It beats the naive baseline but scores far below the tier task —
+    proof that predicting <i>change</i> is much harder than predicting <i>level</i>, which is exactly why
+    early warning is difficult.`],
+ ];
+ document.getElementById('faqWrap').innerHTML = faqs.map(([q,a])=>
+  `<details><summary>${q}</summary><p>${a}</p></details>`).join('');
+})();
+</script>
+</body>
+</html>

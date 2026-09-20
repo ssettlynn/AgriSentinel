@@ -1,0 +1,15 @@
+# Pinned on purpose: an unpinned scientific stack is the fastest way to make a
+# result irreproducible. These versions are the ones verified against Google
+# Colab's runtime, so the notebook and the desktop project resolve identically.
+# Kept in sync with the [project.dependencies] table in pyproject.toml.
+pandas==2.2.2
+numpy==2.0.2
+scikit-learn==1.6.1
+matplotlib==3.10.0
+mlxtend
+shap
+country_converter
+requests
+joblib
+pyyaml
+pytest

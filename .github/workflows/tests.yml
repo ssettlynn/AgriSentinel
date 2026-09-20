@@ -1,0 +1,42 @@
+name: tests
+
+# Runs the 22 unit tests on every push and pull request — deliberately NOT the
+# full pipeline. Reproducing the pipeline needs real model training on the pinned
+# snapshot's downstream artifacts, which belongs in a manual or scheduled
+# "reproduce" workflow, not a fast per-commit check. This job is the guard
+# against exactly the config/schema drift and cleaning edge cases that the
+# README's "Design rules this codebase enforces" section documents.
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Install package + dev dependencies
+        run: pip install -e ".[dev]"
+
+      - name: Run tests
+        run: pytest tests/ -v

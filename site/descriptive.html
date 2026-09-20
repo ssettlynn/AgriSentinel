@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Descriptive Analysis — AgriSentinel</title>
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=17">
+<script src="plotly.min.js"></script>
+<script src="agrisentinel_data.js"></script>
+<script src="agrisentinel.js?v=17"></script>
+</head>
+<body>
+<script>asNav('descriptive.html',false)</script>
+
+<div class="pagehead">
+  <img class="bgart" src="assets/earth.svg" alt="">
+  <div class="wrap">
+    <div class="eyebrow" style="color:#FFD86B">Descriptive Mining</div>
+    <h1>What the data says</h1>
+    <p>Every descriptive result in one place — the dataset, its quality, what moves with
+       hunger, and the patterns found before any model was trained.</p>
+  </div>
+</div>
+
+<!-- ============ A. THE DATASET ============ -->
+<section>
+  <div class="wrap">
+    <div class="center rv">
+      <div class="eyebrow">Part 1</div>
+      <h2>The dataset</h2>
+      <p>What was collected, how complete it is, and how it is shaped.</p>
+    </div>
+    <div class="dpanel rv" id="dCoverage"></div>
+
+    <div class="grid2" style="margin-top:1.8rem">
+      <div class="chartbox rv fill"><h3>Distribution of each indicator</h3>
+        <label style="display:flex;align-items:center;gap:.55rem;margin-bottom:.7rem">
+          <span class="ctl-l">Indicator</span>
+          <select id="dPick" style="flex:1;max-width:230px"></select>
+        </label>
+        <div id="chDist" class="plot" style="height:250px"></div>
+        <div class="explain" id="dDistNote"></div></div>
+
+      <div class="chartbox rv d1 fill"><h3>Risk-tier class balance</h3>
+        <div id="chTier" class="plot" style="height:250px"></div>
+        <div class="explain" id="dTierNote"></div></div>
+    </div>
+
+    <div class="chartbox rv" style="margin-top:1.8rem"><h3>Descriptive statistics</h3>
+      <div class="tablewrap"><table id="tblDesc"></table></div>
+      <div class="explain">Several indicators are strongly skewed, which is why the median is
+        reported alongside the mean and why tree-based models were preferred.</div></div>
+
+    <div class="grid2" style="margin-top:1.8rem">
+      <div class="chartbox rv fill"><h3>Missing values before imputation</h3>
+        <div id="chMiss" class="plot" style="height:250px"></div>
+        <div class="explain" id="dMissNote"></div></div>
+      <div class="chartbox rv d1"><h3>Outliers (1.5 &times; IQR rule)</h3>
+        <div class="tablewrap"><table id="tblOut"></table></div>
+        <div class="explain">Outliers were counted but <b>deliberately retained</b> — extreme
+          values here are real events (famines, hyperinflation), not recording errors.</div></div>
+    </div>
+
+    <div class="chartbox rv" style="margin-top:1.8rem"><h3>Normality check</h3>
+      <div class="tablewrap"><table id="tblNorm"></table></div>
+      <div class="explain" id="dNormNote"></div></div>
+  </div>
+</section>
+
+<!-- ============ B. WHAT MOVES WITH HUNGER ============ -->
+<section style="background:var(--mist)">
+  <div class="wrap">
+    <div class="center rv">
+      <div class="eyebrow">Part 2</div>
+      <h2>What moves with hunger</h2>
+      <p>Correlation, the linear-versus-monotonic question, and whether the group
+         differences are statistically real.</p>
+    </div>
+
+    <div class="grid2">
+      <div class="chartbox rv fill"><h3>Correlation between all indicators</h3>
+        <div id="chCorr" class="plot" style="height:340px"></div>
+        <div class="explain">Blue moves together, red moves opposite. No two inputs are
+          near-identical, so none is redundant.</div></div>
+      <div class="chartbox rv d1 fill"><h3>Pearson vs Spearman with hunger</h3>
+        <div id="chPS" class="plot" style="height:340px"></div>
+        <div class="explain" id="dPSNote"></div></div>
+    </div>
+
+    <div class="chartbox rv" style="margin-top:1.8rem"><h3>Group-difference significance tests</h3>
+      <div class="tablewrap"><table id="tblSig"></table></div>
+      <div class="explain">Both tests are reported because ANOVA assumes normal, equal-variance
+        groups and the hunger rate is skewed — Kruskal&ndash;Wallis makes no such assumption.
+        They agree, so the group differences are not an artefact of the test chosen.</div></div>
+
+    <div class="grid2" style="margin-top:1.8rem">
+      <div class="chartbox rv"><h3>Median hunger by region</h3>
+        <div id="chRegMed" style="height:260px"></div></div>
+      <div class="chartbox rv d1"><h3>Median hunger by income group</h3>
+        <div id="chIncMed" style="height:260px"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ C. PATTERNS ============ -->
+<section>
+  <div class="wrap">
+    <div class="center rv">
+      <div class="eyebrow">Part 3</div>
+      <h2>Patterns across time and groups</h2>
+      <p>The trends the models were built to learn from.</p>
+    </div>
+    <div class="grid2">
+      <div class="chartbox rv"><h3><span class="cnum">1</span>The world was winning — then the shocks came</h3>
+        <div id="chTrend" style="height:230px"></div>
+        <div class="explain">Hunger fell for a decade, then COVID-19 and the 2022 price shock
+          erased much of the progress.</div></div>
+      <div class="chartbox rv d1"><h3><span class="cnum">2</span>Where hunger lives</h3>
+        <div id="chRegion" style="height:230px"></div>
+        <div class="explain">Sub-Saharan Africa carries by far the highest burden, near 20%.
+          It and the Middle East &amp; North Africa are the only regions still above their
+          2010 level.</div></div>
+      <div class="chartbox rv d2"><h3><span class="cnum">3</span>Hunger follows income — structurally</h3>
+        <div id="chIncome" style="height:230px"></div>
+        <div class="explain">In the poorest group the <i>typical</i> country sits above the
+          serious-hunger line.</div></div>
+      <div class="chartbox rv d3"><h3><span class="cnum">4</span>Money matters — until it doesn't</h3>
+        <div id="chScatter" style="height:230px"></div>
+        <div class="explain">Each dot is a country in the latest year. Income cuts hunger fast
+          among the poor, then the effect flattens — the curvilinearity the rank correlation
+          picks up.</div></div>
+      <div class="chartbox rv"><h3><span class="cnum">5</span>Importing food isn't the problem</h3>
+        <div id="chImport" style="height:250px"></div>
+        <div class="explain">Import dependence alone shows no clear hunger trend — a genuine
+          null result.</div></div>
+      <div class="chartbox rv d1"><h3><span class="cnum">6</span>Tier composition over time</h3>
+        <div id="chTierYear" style="height:250px"></div>
+        <div class="explain">The share of countries in each tier, year by year — the shock
+          years are visible as a rise in the high-risk band.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ D. ASSOCIATION RULES ============ -->
+<section style="background:var(--mist)">
+  <div class="wrap">
+    <div class="center rv">
+      <div class="eyebrow">Part 4</div>
+      <h2>Association rules (Apriori)</h2>
+      <p>Combinations of conditions that occur together more often than chance.
+         Lift is how many times more likely the pattern is than if the conditions
+         were independent.</p>
+    </div>
+    <div class="tablewrap rv"><table id="ruleTable"></table></div>
+    <div id="ruleKey" class="rv" style="margin-top:1.1rem"></div>
+    <div class="explain rv d1">Import dependence looks harmless on its own. It raises risk only
+      combined with low income — a pattern single-variable analysis cannot see, and the reason
+      this unsupervised step earns its place alongside the models.</div>
+  </div>
+</section>
+
+<script>asFooter()</script>
+<script>
+const D=AS.DATASTATS, FE=['pou','des_adequacy','cereal_import_dep','food_prod_var',
+ 'gdp_per_capita','gdp_growth','inflation_cpi','pop_growth'];
+const nm=f=>AS.NICE[f]||f;
+const fmt=(v,n=2)=>v==null?'—':(Math.abs(v)>=1000?Math.round(v).toLocaleString():(+v).toFixed(n));
+const pFmt=p=>p===0?'&lt;1e-300':(p<0.001?p.toExponential(1):(+p).toFixed(3));
+
+// ---- dataset provenance panel ----
+// Three headline facts first, then the dimensions as chips, then the sources.
+// Six identical tiles gave "180 countries" and "4 income groups" equal weight.
+const C=D.coverage||{};
+const span=(C.year_min&&C.year_max)?(C.year_max-C.year_min+1):null;
+const hero=[
+ [C.countries??'—','countries','tracked 2010&ndash;'+(C.year_max??'')],
+ [C.rows?C.rows.toLocaleString():'—','country-year observations','one row per country, per year'],
+ [(C.year_min&&C.year_max)?C.year_min+'&ndash;'+C.year_max:'—','years covered',
+  span?span+' consecutive years':''],
+];
+const chips=[
+ [FE.length,'indicators','#175487'],
+ [C.regions,'world regions','#1E9E8A'],
+ [C.income_groups,'income groups','#E6A817'],
+ [TIERS.length,'risk tiers','#D64550'],
+ [2,'open data sources','#5B4E9C'],
+];
+document.getElementById('dCoverage').innerHTML=
+ '<div class="dhero">'
+ +hero.map(([v,k,s])=>`<div><div class="v">${v}</div><div class="k">${k}</div>
+    <div class="s">${s}</div></div>`).join('')
+ +'</div><div class="dchips">'
+ +chips.map(([v,k,c])=>`<div class="dchip"><i style="background:${c}"></i>${v}
+    <span>${k}</span></div>`).join('')
+ +'</div><div class="dsrc"><b>Sources:</b> FAOSTAT Food Security Indicators '
+ +'&middot; World Bank Open Data &mdash; both pinned to a fixed snapshot date, '
+ +'so every number on this site is reproducible.</div>';
+
+// ---- indicator picker + histogram ----
+const pick=document.getElementById('dPick');
+FE.forEach(f=>{const o=document.createElement('option');o.value=f;o.textContent=nm(f);pick.appendChild(o);});
+function vals(f){const out=[];ISOs.forEach(c=>{const s=AS.SERIES[c];if(!s[f])return;
+ s[f].forEach(v=>{if(v!=null)out.push(v);});});return out;}
+function drawDist(){const f=pick.value,v=vals(f),d=D.descriptive[f]||{};
+ Plotly.react('chDist',[{x:v,type:'histogram',marker:{color:'#175487'},nbinsx:40}],
+  {...LAYOUT,yaxis:{title:'country-years'},xaxis:{title:nm(f)},bargap:.04,
+   shapes:d['50%']!=null?[{type:'line',x0:d['50%'],x1:d['50%'],y0:0,y1:1,yref:'paper',
+    line:{color:'#D64550',dash:'dash',width:1.5}}]:[],
+   annotations:d['50%']!=null?[{x:d['50%'],y:1.06,yref:'paper',text:'median '+fmt(d['50%']),
+    showarrow:false,font:{size:10,color:'#D64550'},xanchor:'left',xshift:4}]:[],
+   margin:{l:58,r:20,t:26,b:46}},PLOTCFG);
+ document.getElementById('dDistNote').innerHTML=
+  `Skew <b>${fmt(d.skew)}</b> · median <b>${fmt(d['50%'])}</b> vs mean <b>${fmt(d.mean)}</b>`
+  +(d.skew>1?' — a long right tail, so the mean overstates the typical country.':'.');}
+pick.onchange=drawDist;drawDist();
+
+// ---- tier class balance ----
+const T=D.tier_distribution||{};
+// headroom so the tallest bar's outside label is not clipped by the plot edge
+const tierMax=Math.max(...TIERS.map(t=>T[t]?T[t].count:0));
+Plotly.newPlot('chTier',[{x:TIERS,y:TIERS.map(t=>T[t]?T[t].count:0),type:'bar',
+ marker:{color:TIERS.map(t=>TC[t])},cliponaxis:false,
+ text:TIERS.map(t=>T[t]?T[t].count+' ('+T[t].pct+'%)':''),textposition:'outside'}],
+ {...LAYOUT,yaxis:{title:'country-years',range:[0,tierMax*1.16]},
+  margin:{l:58,r:20,t:26,b:52}},PLOTCFG);
+document.getElementById('dTierNote').innerHTML=
+ `The classes are <b>not balanced</b>: High is the smallest at ${T.High?T.High.pct:'—'}% yet the
+  one that matters most. That is why macro-F1, not accuracy, is the headline metric.`;
+
+// ---- descriptive statistics table ----
+document.getElementById('tblDesc').innerHTML=
+ '<thead><tr><th>Indicator</th><th>Count</th><th>Mean</th><th>Std</th><th>Min</th>'
+ +'<th>25%</th><th>Median</th><th>75%</th><th>Max</th><th>Skew</th></tr></thead><tbody>'
+ +FE.map(f=>{const d=D.descriptive[f]||{};
+   return `<tr><td><b>${nm(f)}</b></td><td>${d.count??'—'}</td><td>${fmt(d.mean)}</td>
+   <td>${fmt(d.std)}</td><td>${fmt(d.min)}</td><td>${fmt(d['25%'])}</td>
+   <td>${fmt(d['50%'])}</td><td>${fmt(d['75%'])}</td><td>${fmt(d.max)}</td>
+   <td>${fmt(d.skew,1)}</td></tr>`;}).join('')+'</tbody>';
+
+// ---- missing values ----
+const M=AS.MISSING||[];
+Plotly.newPlot('chMiss',[{y:M.map(r=>nm(r.indicator)).reverse(),x:M.map(r=>r.pct).reverse(),
+ type:'bar',orientation:'h',marker:{color:'#E6A817'},cliponaxis:false,
+ text:M.map(r=>r.pct+'%').reverse(),textposition:'outside',textfont:{size:11}}],
+ {...LAYOUT,xaxis:{title:'% missing',range:[0,Math.max(...M.map(r=>r.pct))*1.28]},
+  margin:{l:158,r:70,t:10,b:44}},PLOTCFG);
+document.getElementById('dMissNote').innerHTML=M.length
+ ? `Worst: <b>${nm(M[0].indicator)}</b> at ${M[0].pct}%. Missing values are filled with the
+    <b>training-set median</b> inside the model pipeline, so no test-set information leaks back
+    into training.` : '';
+
+// ---- outliers table ----
+document.getElementById('tblOut').innerHTML=
+ '<thead><tr><th>Indicator</th><th>Outliers</th><th>%</th><th>Normal range</th></tr></thead><tbody>'
+ +FE.map(f=>{const o=D.outliers_iqr[f]||{};
+   return `<tr><td><b>${nm(f)}</b></td><td>${o.n_outliers??'—'}</td><td>${o.pct??'—'}%</td>
+   <td style="color:var(--muted);white-space:nowrap;font-size:.84rem">${fmt(o.range_min)} &ndash; ${fmt(o.range_max)}</td></tr>`;}).join('')
+ +'</tbody>';
+
+// ---- normality ----
+document.getElementById('tblNorm').innerHTML=
+ '<thead><tr><th>Indicator</th><th>Skew</th><th>D&rsquo;Agostino p</th><th>Normal at 5%?</th></tr></thead><tbody>'
+ +FE.map(f=>{const n=D.normality[f]||{};
+   return `<tr><td><b>${nm(f)}</b></td><td>${fmt(n.skew,2)}</td>
+   <td style="color:var(--muted)">${pFmt(n.normaltest_p)}</td>
+   <td><span class="badge" style="background:${n.normal_at_5pct?'#1A9E77':'#D64550'};font-size:.72rem">
+     ${n.normal_at_5pct?'Yes':'No'}</span></td></tr>`;}).join('')+'</tbody>';
+document.getElementById('dNormNote').innerHTML=
+ `Not one indicator is normally distributed. This is the evidence behind two choices:
+  <b>Spearman</b> alongside Pearson below, and a <b>non-parametric</b> Kruskal&ndash;Wallis test
+  next to ANOVA.`;
+
+// ---- correlation heatmap (all indicators) ----
+(()=>{const col={};FE.forEach(f=>col[f]=[]);
+ ISOs.forEach(c=>{const s=AS.SERIES[c];s.y.forEach((_,i)=>FE.forEach(f=>col[f].push(s[f]?s[f][i]:null)));});
+ const pear=(a,b)=>{let n=0,sa=0,sb=0,saa=0,sbb=0,sab=0;
+  for(let i=0;i<a.length;i++){const x=a[i],y=b[i];if(x==null||y==null)continue;
+   n++;sa+=x;sb+=y;saa+=x*x;sbb+=y*y;sab+=x*y;}
+  if(n<3)return 0;const cov=sab-sa*sb/n,va=saa-sa*sa/n,vb=sbb-sb*sb/n;
+  return (va<=0||vb<=0)?0:cov/Math.sqrt(va*vb);};
+ // A correlation matrix is symmetric, so the upper half repeats the lower half and
+ // the diagonal is always 1.00. Showing all 64 cells doubles the reading work for
+ // no extra information — only the lower triangle is drawn.
+ const z=FE.map((a,i)=>FE.map((b,j)=> j>=i ? null : +pear(col[a],col[b]).toFixed(2)));
+ // texttemplate stringifies null as the literal word "null", so the masked half
+ // must be handed an empty string rather than the raw z value
+ const zt=z.map(r=>r.map(v=>v===null?'':v.toFixed(2)));
+ Plotly.newPlot('chCorr',[{type:'heatmap',z:z,x:FE.map(nm),y:FE.map(nm),zmin:-1,zmax:1,
+  colorscale:[[0,'#D64550'],[.5,'#F4F7FA'],[1,'#175487']],
+  xgap:2,ygap:2,
+  text:zt,texttemplate:'%{text}',textfont:{size:9.5},
+  hovertemplate:'%{y} &times; %{x}<br>r = %{z}<extra></extra>',
+  hoverongaps:false,showscale:false}],
+  {...LAYOUT,margin:{l:132,r:14,t:8,b:100},xaxis:{tickfont:{size:9},tickangle:-38},
+   yaxis:{tickfont:{size:9},autorange:'reversed'}},PLOTCFG);})();
+
+// ---- Pearson vs Spearman ----
+(()=>{const G=D.correlation_gap||{};
+ const ks=Object.keys(G).sort((a,b)=>Math.abs(G[b].spearman)-Math.abs(G[a].spearman));
+ Plotly.newPlot('chPS',[
+  {y:ks.map(nm).reverse(),x:ks.map(k=>G[k].pearson).reverse(),type:'bar',orientation:'h',
+   name:'Pearson (linear)',marker:{color:'#175487'}},
+  {y:ks.map(nm).reverse(),x:ks.map(k=>G[k].spearman).reverse(),type:'bar',orientation:'h',
+   name:'Spearman (rank)',marker:{color:'#E6A817'}}],
+  {...LAYOUT,barmode:'group',xaxis:{title:'correlation with hunger',range:[-1,1],zeroline:true},
+   legend:{orientation:'h',y:1.12},margin:{l:150,r:20,t:34,b:44}},PLOTCFG);
+ const big=ks.reduce((a,k)=>Math.abs(G[k].gap)>Math.abs(G[a].gap)?k:a,ks[0]);
+ document.getElementById('dPSNote').innerHTML=
+  `Where the two bars differ, the relationship is <b>curved rather than straight</b>.
+   The gap is widest for <b>${nm(big)}</b> (Pearson ${G[big].pearson}, Spearman
+   ${G[big].spearman}, gap ${G[big].gap}) — income tracks hunger consistently in rank order,
+   but not in a straight line.`;})();
+
+// ---- group significance table ----
+(()=>{const S=D.group_significance||{};
+ document.getElementById('tblSig').innerHTML=
+  '<thead><tr><th>Grouping</th><th>Groups</th><th>ANOVA F</th><th>ANOVA p</th>'
+  +'<th>Kruskal H</th><th>Kruskal p</th><th>Significant</th></tr></thead><tbody>'
+  +Object.entries(S).map(([k,v])=>
+   `<tr><td><b>${k==='income_group'?'Income group':'Region'}</b></td><td>${v.n_groups}</td>
+    <td>${v.anova_F}</td><td style="color:var(--muted)">${pFmt(v.anova_p)}</td>
+    <td>${v.kruskal_H}</td><td style="color:var(--muted)">${pFmt(v.kruskal_p)}</td>
+    <td><span class="badge" style="background:${v.significant?'#1A9E77':'#8B93A7'};font-size:.72rem">
+      ${v.significant?'Yes':'No'}</span></td></tr>`).join('')+'</tbody>';
+ const med=(o,el,cols)=>{const e=Object.entries(o).sort((a,b)=>b[1]-a[1]);
+  const mx=Math.max(...e.map(x=>x[1]));
+  Plotly.newPlot(el,[{x:e.map(x=>x[0]),y:e.map(x=>x[1]),type:'bar',marker:{color:cols},
+   text:e.map(x=>x[1]+'%'),textposition:'outside',cliponaxis:false}],
+   {...LAYOUT,yaxis:{title:'median hunger %',range:[0,Math.max(mx,15)*1.18]},
+    xaxis:{tickangle:-22,tickfont:{size:9.5}},
+    margin:{l:52,r:14,t:16,b:96},
+    shapes:[{type:'line',x0:-.5,x1:e.length-.5,y0:15,y1:15,line:{color:TC.High,dash:'dash'}}]},PLOTCFG);};
+ if(S.region) med(S.region.group_medians,'chRegMed','#175487');
+ if(S.income_group) med(S.income_group.group_medians,'chIncMed',['#BFE3D6','#1A9E77','#E6A817','#D64550']);})();
+
+// ---- Part 3: global trend ----
+Plotly.newPlot('chTrend',[{x:AS.GLOB.years,y:AS.GLOB.global_pou,fill:'tozeroy',mode:'lines+markers',
+ line:{color:'#175487',width:3},fillcolor:'rgba(23,84,135,.12)'}],
+ {...LAYOUT,yaxis:{title:'avg hunger %'},
+  shapes:[2020,2022].filter(x=>AS.GLOB.years.includes(x)).map(x=>({type:'line',x0:x,x1:x,y0:0,y1:1,yref:'paper',
+   line:{color:TC.High,dash:'dash',width:1.5}})),
+  annotations:[2020,2022].filter(x=>AS.GLOB.years.includes(x)).map(x=>({x:x,y:x===2020?1:.93,yref:'paper',
+   text:x===2020?'COVID':'Price shock',showarrow:false,font:{color:TC.High,size:10}}))},PLOTCFG);
+
+const regColors=['#D64550','#E6A817','#175487','#1A9E77','#5B4E9C','#8B93A7','#444'];
+Plotly.newPlot('chRegion',Object.keys(AS.GLOB.regions).map((r,i)=>({x:AS.GLOB.years,y:AS.GLOB.regions[r],
+ mode:'lines',name:r,line:{color:regColors[i%7],width:2.5}})),
+ {...LAYOUT,yaxis:{title:'avg hunger %'},legend:{font:{size:9}}},PLOTCFG);
+
+const incKey='income_'+AS.GLOB.latest_year,incData=AS.GLOB[incKey]||{};
+const incOrder=['High income','Upper middle income','Lower middle income','Low income'].filter(k=>k in incData);
+Plotly.newPlot('chIncome',[{x:incOrder,y:incOrder.map(k=>incData[k]),type:'bar',
+ marker:{color:['#BFE3D6','#1A9E77','#E6A817','#D64550']},cliponaxis:false,
+ text:incOrder.map(k=>incData[k]+'%'),textposition:'outside'}],
+ {...LAYOUT,yaxis:{title:'median hunger % ('+AS.GLOB.latest_year+')',
+   range:[0,Math.max(...incOrder.map(k=>incData[k]),15)*1.2]},
+  xaxis:{tickangle:-18,tickfont:{size:9.5}},
+  margin:{l:52,r:14,t:16,b:86},
+  shapes:[{type:'line',x0:-.5,x1:incOrder.length-.5,y0:15,y1:15,line:{color:TC.High,dash:'dash'}}]},PLOTCFG);
+
+(()=>{const xs={Low:[],Medium:[],High:[]},ys={Low:[],Medium:[],High:[]},ts={Low:[],Medium:[],High:[]};
+ ISOs.forEach(c=>{const s=AS.SERIES[c],i=s.y.indexOf(AS.GLOB.latest_year);
+  if(i>-1&&s.tier[i]&&s.gdp_per_capita[i]){xs[s.tier[i]].push(s.gdp_per_capita[i]);
+   ys[s.tier[i]].push(s.pou[i]);ts[s.tier[i]].push(AS.META[c].n);}});
+ Plotly.newPlot('chScatter',TIERS.map(t=>({x:xs[t],y:ys[t],text:ts[t],mode:'markers',name:t,
+  marker:{color:TC[t],size:8,opacity:.75},hovertemplate:'<b>%{text}</b><br>$%{x:,.0f} · %{y}%<extra></extra>'})),
+  {...LAYOUT,xaxis:{type:'log',title:'income per person (log)'},yaxis:{title:'hunger %'}},PLOTCFG);})();
+
+(()=>{const pts=[];
+ ISOs.forEach(c=>{const s=AS.SERIES[c];s.y.forEach((_,i)=>{
+  const d=s.cereal_import_dep&&s.cereal_import_dep[i],p=s.pou&&s.pou[i];
+  if(d!=null&&p!=null)pts.push([d,p]);});});
+ const deps=pts.map(p=>p[0]).sort((a,b)=>a-b),q=k=>deps[Math.floor(k*(deps.length-1))];
+ const cut=[q(.25),q(.5),q(.75)],bins=[[],[],[],[]];
+ pts.forEach(([d,p])=>{bins[d<cut[0]?0:d<cut[1]?1:d<cut[2]?2:3].push(p);});
+ Plotly.newPlot('chImport',bins.map((b,i)=>({type:'box',y:b,
+  name:['Q1 (least import)','Q2','Q3','Q4 (most import)'][i],
+  marker:{color:['#1A9E77','#8FB98A','#E6A817','#175487'][i]},boxpoints:false})),
+  {...LAYOUT,showlegend:false,yaxis:{title:'hunger %'},margin:{l:52,r:10,t:10,b:60}},PLOTCFG);})();
+
+// ---- tier composition by year (stacked share) ----
+(()=>{const years=AS.GLOB.years,counts=years.map(()=>({Low:0,Medium:0,High:0}));
+ ISOs.forEach(c=>{const s=AS.SERIES[c];years.forEach((y,yi)=>{const i=s.y.indexOf(y);
+  if(i>-1&&s.tier[i])counts[yi][s.tier[i]]++;});});
+ const tot=counts.map(c=>c.Low+c.Medium+c.High);
+ Plotly.newPlot('chTierYear',TIERS.map(t=>({x:years,
+  y:counts.map((c,i)=>tot[i]?+(c[t]/tot[i]*100).toFixed(1):0),
+  type:'bar',name:t,marker:{color:TC[t]}})),
+  {...LAYOUT,barmode:'stack',yaxis:{title:'% of countries',range:[0,100]},
+   legend:{orientation:'h',y:1.14},margin:{l:52,r:14,t:34,b:40}},PLOTCFG);})();
+
+// ---- association rules ----
+// Risk direction is judged from EVERY item in the rule (antecedent + consequent),
+// not just the consequent — many mined rules carry HUNGER_HIGH on the antecedent side.
+const BAD_ITEMS=['HUNGER_HIGH','INCOME_LOW','SUPPLY_INADEQUATE','INFLATION_HIGH','IMPORT_DEP_HIGH','ECON_SHRINKING','POPGROWTH_HIGH'];
+const GOOD_ITEMS=['HUNGER_LOW','INCOME_HIGH'];
+// Each mined item is one indicator crossing one threshold, so it is LABELLED with
+// that indicator's dataset name (AS.NICE — the same name the correlation heatmap,
+// SHAP chart and forecast page use) plus the condition. The old prettifier
+// invented its own wording ("inadequate food supply", "low income"), which meant
+// the same indicator was called three different things on three charts.
+// [dataset key, condition word, the actual cut used in features.build_transactions]
+const ITEM={
+ HUNGER_LOW:       ['pou',              'low',        '&lt; 5%'],
+ HUNGER_MED:       ['pou',              'medium',     '5–15%'],
+ HUNGER_HIGH:      ['pou',              'high',       '≥ 15%'],
+ INCOME_LOW:       ['gdp_per_capita',   'low',        'bottom third'],
+ INCOME_MID:       ['gdp_per_capita',   'middle',     'middle third'],
+ INCOME_HIGH:      ['gdp_per_capita',   'high',       'top third'],
+ INFLATION_HIGH:   ['inflation_cpi',    'high',       '≥ 10%'],
+ IMPORT_DEP_HIGH:  ['cereal_import_dep','high',       '≥ 50% of cereals imported'],
+ SUPPLY_INADEQUATE:['des_adequacy',     'inadequate', '&lt; 100% of needs'],
+ ECON_SHRINKING:   ['gdp_growth',       'negative',   '&lt; 0%'],
+ POPGROWTH_HIGH:   ['pop_growth',       'high',       '≥ 2% a year'],
+};
+const itemLabel=k=>{const d=ITEM[k.trim()];
+ return d?`${AS.NICE[d[0]]}: <b>${d[1]}</b>`:k.trim().replace(/_/g,' ').toLowerCase();};
+const sideLabel=s=>s.split('+').map(itemLabel).join(' <span style="color:var(--muted)">+</span> ');
+
+document.getElementById('ruleTable').innerHTML=
+ '<thead><tr><th style="width:70px">Lift</th><th>Pattern</th>'
+ +'<th style="width:80px;text-align:right">Holds</th>'
+ +'<th style="width:82px;text-align:right">Support</th></tr></thead><tbody>'
+ +AS.RULES.slice(0,10).map(r=>{
+   const whole=r.antecedent+' '+r.consequent;
+   const risk=BAD_ITEMS.filter(i=>whole.includes(i)).length
+             >=GOOD_ITEMS.filter(i=>whole.includes(i)).length;
+   return `<tr><td style="font-weight:700;color:${risk?'#D64550':'#1A9E77'}">${r.lift}&times;</td>
+    <td>${sideLabel(r.antecedent)} <span style="color:var(--muted)">&rarr;</span> ${sideLabel(r.consequent)}</td>
+    <td style="text-align:right;color:var(--muted)">${Math.round(r.confidence*100)}%</td>
+    <td style="text-align:right;color:var(--muted)">${Math.round(r.support*100)}%</td></tr>`;
+ }).join('')+'</tbody>';
+
+// the thresholds behind every word above — so "high" is never left undefined
+const used=[...new Set(AS.RULES.slice(0,10)
+  .flatMap(r=>(r.antecedent+'+'+r.consequent).split('+').map(x=>x.trim())))]
+  .filter(k=>ITEM[k]);
+document.getElementById('ruleKey').innerHTML=
+ '<div style="font-size:.78rem;font-weight:700;color:var(--muted);text-transform:uppercase;'
+ +'letter-spacing:.08em;margin-bottom:.5rem">How each condition is defined</div>'
+ +'<div style="display:flex;flex-wrap:wrap;gap:.4rem .7rem">'
+ +used.map(k=>{const d=ITEM[k];
+   return `<span style="font-size:.82rem;background:var(--mist);border:1px solid #E7EDF3;
+     border-radius:999px;padding:.3rem .75rem">${AS.NICE[d[0]]}
+     <b>${d[1]}</b> <span style="color:var(--muted)">= ${d[2]}</span></span>`;}).join('')
+ +'</div>';
+</script>
+</body>
+</html>

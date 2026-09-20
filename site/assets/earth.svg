@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+<defs>
+<radialGradient id="space" cx=".5" cy=".4" r=".9">
+ <stop offset="0" stop-color="#0B3D6E"/><stop offset="1" stop-color="#04101F"/>
+</radialGradient>
+<radialGradient id="globe" cx=".38" cy=".32" r=".85">
+ <stop offset="0" stop-color="#3E9BD6"/><stop offset=".55" stop-color="#0F5FA8"/>
+ <stop offset="1" stop-color="#082A47"/>
+</radialGradient>
+<radialGradient id="atmo" cx=".5" cy=".5" r=".5">
+ <stop offset=".82" stop-color="#5FC2E7" stop-opacity="0"/>
+ <stop offset=".93" stop-color="#5FC2E7" stop-opacity=".55"/>
+ <stop offset="1" stop-color="#5FC2E7" stop-opacity="0"/>
+</radialGradient>
+<filter id="glow"><feGaussianBlur stdDeviation="6"/></filter>
+</defs>
+
+<rect width="1920" height="1080" fill="url(#space)"/>
+
+<!-- stars -->
+<g fill="#DCE9F5">
+ <circle cx="140" cy="120" r="2"/><circle cx="330" cy="240" r="1.5" opacity=".7"/>
+ <circle cx="520" cy="90" r="1.8"/><circle cx="720" cy="200" r="1.3" opacity=".6"/>
+ <circle cx="1180" cy="110" r="2"/><circle cx="1420" cy="220" r="1.5" opacity=".8"/>
+ <circle cx="1640" cy="90" r="2.2"/><circle cx="1790" cy="300" r="1.4" opacity=".6"/>
+ <circle cx="240" cy="420" r="1.6" opacity=".7"/><circle cx="1710" cy="520" r="1.7" opacity=".7"/>
+ <circle cx="90" cy="640" r="1.9"/><circle cx="1850" cy="760" r="1.5" opacity=".6"/>
+</g>
+
+<!-- globe -->
+<circle cx="960" cy="640" r="470" fill="url(#atmo)"/>
+<circle cx="960" cy="640" r="400" fill="url(#globe)"/>
+
+<!-- stylised landmasses -->
+<g fill="#1A9E77" opacity=".85">
+ <path d="M900,360 q90,-30 150,20 q60,50 20,110 q-30,45 -90,40 q-70,-6 -100,-60 q-25,-70 20,-110Z"/>
+ <path d="M1040,560 q80,10 100,80 q15,70 -40,120 q-55,45 -110,10 q-45,-35 -35,-100 q10,-80 85,-110Z"/>
+ <path d="M760,540 q60,-20 90,30 q25,50 -10,95 q-40,45 -95,20 q-50,-25 -40,-80 q10,-45 55,-65Z"/>
+ <path d="M700,760 q50,-5 65,40 q12,45 -25,70 q-45,25 -80,-10 q-30,-35 -5,-70 q20,-25 45,-30Z"/>
+</g>
+<g fill="#E6A817" opacity=".55">
+ <path d="M880,470 q40,-14 70,10 q25,25 5,55 q-25,30 -60,18 q-35,-14 -35,-45 q3,-25 20,-38Z"/>
+</g>
+
+<!-- night shadow -->
+<path d="M960,240 a400,400 0 0 1 0,800 a480,400 0 0 0 0,-800Z" fill="#04101F" opacity=".45"/>
+
+<!-- data connection arcs -->
+<g stroke="#FFD86B" fill="none" stroke-width="3" opacity=".9" filter="url(#glow)">
+ <path d="M760,470 Q960,300 1180,520"/>
+ <path d="M820,760 Q1060,900 1220,640"/>
+ <path d="M700,620 Q880,520 1080,680"/>
+</g>
+<g fill="#FFD86B">
+ <circle cx="760" cy="470" r="8"/><circle cx="1180" cy="520" r="8"/>
+ <circle cx="820" cy="760" r="7"/><circle cx="1220" cy="640" r="7"/>
+ <circle cx="700" cy="620" r="6"/><circle cx="1080" cy="680" r="6"/>
+</g>
+</svg>

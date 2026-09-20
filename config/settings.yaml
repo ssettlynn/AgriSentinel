@@ -1,0 +1,30 @@
+# AgriSentinel run parameters — the pipeline reads these, never hardcodes them inline.
+# Mirrors config/paths.py's run_parameters section (kept simple/duplicated intentionally:
+# YAML is what a human edits by hand; paths.py/schema.json are what code imports).
+
+data:
+  year_min: 2010
+  year_max: 2023
+  missing_threshold: 0.5        # drop a country-year if >= this share of raw features missing
+  interpolation_max_gap: 2      # years; larger gaps are left missing, not guessed
+
+splits:
+  1yr: { train_end: 2017, val_end: 2019 }   # test = everything after val_end
+  5yr: { train_end: 2014, val_end: 2016 }
+
+models:
+  random_state: 42
+  rf_n_estimators: 400
+  dtree_max_depth: 6
+  dtree_min_samples_leaf: 10
+
+direction_task:
+  worsening_threshold_pp: 0.5    # PoU change > +0.5pp = Worsening
+  improving_threshold_pp: -0.5   # PoU change < -0.5pp = Improving
+
+reproducibility:
+  # If true, the pipeline REFUSES to fetch "latest" data and fails loudly if no
+  # pinned snapshot exists at data/raw/<source>/<snapshot_date>/. Set false only
+  # to intentionally create a new dated snapshot.
+  require_pinned_snapshot: true
+  snapshot_date: "2026-07-28"    # the official AgriSentinel v1 snapshot — pinned, checksummed, in manifest.json

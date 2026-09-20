@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Model Lab — AgriSentinel</title>
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=17">
+<script src="plotly.min.js"></script>
+<script src="agrisentinel_data.js"></script>
+<script src="agrisentinel.js?v=17"></script>
+</head>
+<body>
+<script>asNav('modellab.html',false)</script>
+
+<div class="pagehead">
+  <div class="wrap">
+    <h1>Model Lab</h1>
+    <p>Methods, results and feature importance. Every score is measured on years the
+       models never saw during training.</p>
+  </div>
+</div>
+
+<section>
+  <div class="wrap">
+    <h2 style="font-size:1.5rem">Prediction tasks</h2>
+    <p style="color:var(--muted);margin-bottom:1.4rem">Three tasks from one dataset, each scored
+       against a baseline.</p>
+    <div class="grid3 rv" id="taskCards"></div>
+    <div class="explain rv d1" style="margin-top:1.4rem">Predicting the <b>level</b> is easy —
+      hunger moves slowly. Predicting the <b>direction of change</b> is far harder, and that is
+      the early-warning question that matters.</div>
+  </div>
+</section>
+
+<section style="background:var(--mist)">
+  <div class="wrap">
+    <h2 style="font-size:1.5rem">Forecast horizon: 1 year vs 5 years</h2>
+    <p style="color:var(--muted);margin-bottom:1.4rem">Same ten features, two horizons.
+       The drop in accuracy is itself a result.</p>
+    <div class="grid2">
+      <div class="chartbox rv"><h3>Macro-F1 and recall by horizon (test set)</h3>
+        <div id="chHorizon" style="height:240px"></div>
+        <div class="explain" id="chHorizonNote"></div></div>
+      <div class="chartbox rv d1"><h3>Countries that change tier</h3>
+        <div id="chChange" style="height:240px"></div>
+        <div class="explain">Tiers are stable year to year, which is why "same as last year"
+          is a strong baseline. Over five years, far more countries move.</div></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2 style="font-size:1.5rem">Test-set results</h2>
+    <p style="color:var(--muted);margin-bottom:1.4rem">Macro-F1 weights all three tiers equally.
+       Recall (High) is the share of genuinely high-risk countries the model catches.</p>
+    <div class="grid2">
+      <div class="chartbox rv"><h3>1-year horizon</h3><div class="tablewrap"><table id="tbl1"></table></div></div>
+      <div class="chartbox rv d1"><h3>5-year horizon</h3><div class="tablewrap"><table id="tbl5"></table></div></div>
+    </div>
+    <div class="explain rv d2" style="margin-top:1.4rem" id="scoreboardNote"></div>
+  </div>
+</section>
+
+<section style="background:var(--mist)">
+  <div class="wrap">
+    <h2 style="font-size:1.5rem">Weighting recall more heavily (F<sub>&beta;</sub>)</h2>
+    <p style="color:var(--muted);margin-bottom:1.4rem">Macro-F1 treats a false alarm and a missed
+       warning as equally bad. For an early-warning system they are not &mdash; missing a high-risk
+       country is the costlier mistake. F<sub>&beta;</sub> makes that weighting explicit. We report
+       F<sub>2</sub>, which counts recall twice as heavily as precision, because that matches how this
+       system is meant to be used. (&beta;&nbsp;=&nbsp;1 is exactly the macro-F1 shown above.)</p>
+    <div class="grid2">
+      <div class="chartbox rv"><h3>1-year horizon</h3><div class="tablewrap"><table id="tblFb1"></table></div></div>
+      <div class="chartbox rv d1"><h3>5-year horizon</h3><div class="tablewrap"><table id="tblFb5"></table></div></div>
+    </div>
+    <div class="explain rv d2" style="margin-top:1.4rem" id="fbetaNote"></div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2 style="font-size:1.5rem">How much should a missed warning weigh?</h2>
+    <p style="color:var(--muted);margin-bottom:1rem">Telling the model that the High tier matters more
+       buys recall and costs precision. Rather than assume one setting, we swept five &mdash; no weighting,
+       sklearn's automatic <code>balanced</code>, and High weighted 2&times;, 3&times; and 5&times; &mdash;
+       and measured both sides of the trade. Scored on the validation split, never on test.</p>
+    <div class="seg rv" id="cwTabs" style="margin-bottom:1rem"></div>
+    <div class="grid2">
+      <div class="chartbox rv"><h3>1-year horizon</h3><div class="tablewrap"><table id="tblCw1"></table></div></div>
+      <div class="chartbox rv d1"><h3>5-year horizon</h3><div class="tablewrap"><table id="tblCw5"></table></div></div>
+    </div>
+    <div class="explain rv d2" style="margin-top:1.4rem" id="cwNote"></div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2 style="font-size:1.5rem">Feature importance (SHAP)</h2>
+    <p style="color:var(--muted);margin-bottom:1.4rem">Mean absolute SHAP value per feature.
+       This is the site-wide average — per-country explanations are on the
+       <a href="forecast.html">Forecast</a> page.</p>
+    <div class="chartbox rv"><div id="chShap" style="height:300px"></div>
+      <div class="explain">Current hunger dominates at one year. Over five years its weight falls
+        while income and population growth rise — structure matters more the further ahead
+        we look.</div></div>
+  </div>
+</section>
+
+<!-- ============ HOW WE TESTED IT ============ -->
+<section>
+  <div class="wrap">
+    <div class="center rv">
+      <div class="eyebrow">Evidence</div>
+      <h2>How we tested it</h2>
+      <p>Not just the score — which mistakes the model makes, how the decision
+         threshold was chosen, and whether the improvement is statistically real.</p>
+    </div>
+
+    <div class="tbar rv" style="justify-content:center;margin-bottom:1.6rem">
+      <span class="tbar-l">Horizon</span>
+      <div class="seg">
+        <button class="echip on" data-e="1yr">Next year</button>
+        <button class="echip fc" data-e="5yr">Five years</button>
+      </div>
+    </div>
+
+    <div class="grid2" style="align-items:start">
+      <div class="chartbox rv"><h3>Confusion matrix</h3>
+        <div id="cmWrap" style="margin-top:.9rem"></div>
+        <div class="explain" id="cmNote"></div></div>
+      <div class="chartbox rv d1"><h3>Per-class results</h3>
+        <div class="tablewrap"><table id="tblClass"></table></div>
+        <div class="explain">Macro-F1 is the unweighted mean of the three F1 scores, so the
+          smallest class counts as much as the largest.</div></div>
+    </div>
+
+    <div class="grid2" style="margin-top:1.8rem;align-items:start">
+      <div class="chartbox rv"><h3>Is the improvement real?</h3>
+        <div id="chCI" style="height:200px"></div>
+        <div class="explain" id="ciNote"></div></div>
+      <div class="chartbox rv d1"><h3>Threshold tuning (validation set)</h3>
+        <div id="chThresh" style="height:200px"></div>
+        <div class="explain" id="thNote"></div></div>
+    </div>
+
+    <div class="chartbox rv" style="margin-top:1.8rem"><h3>Forecast accuracy by indicator</h3>
+      <div id="chFC" style="height:270px"></div>
+      <div class="explain" id="fcNote"></div></div>
+  </div>
+</section>
+
+
+
+<script>asFooter()</script>
+<script>
+// ---- Section 0: three prediction tasks ----
+document.getElementById('taskCards').innerHTML=(AS.TASKS||[]).map(t=>{
+ const beats=t.type==='Regression'?t.score<t.baseline:t.score>t.baseline;
+ return `<div class="card" style="border-top:3px solid #175487;padding:.95rem 1.1rem">
+  <div style="font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">${t.type}</div>
+  <b style="font-size:1rem;display:block;margin:.15rem 0 .05rem">${t.name}</b>
+  <span style="color:var(--muted);font-size:.8rem;line-height:1.4;display:block">${t.note}</span>
+  <div style="margin-top:.6rem;font-family:var(--serif);font-size:1.4rem;font-weight:700;color:#175487">${t.score}</div>
+  <div style="font-size:.75rem;color:var(--muted)">${t.metric} · baseline ${t.baseline}${beats?' · <span style="color:#1A9E77;font-weight:700">beats it</span>':''}</div></div>`;
+}).join('');
+
+// ---- Section 1a: horizon comparison ----
+const rf1=AS.METRICS.find(m=>m.horizon==='1yr'&&m.model==='Random Forest'&&m.split==='test');
+const rf5=AS.METRICS.find(m=>m.horizon==='5yr'&&m.model==='Random Forest'&&m.split==='test');
+const b1=AS.METRICS.find(m=>m.horizon==='1yr'&&m.model==='Persistence'&&m.split==='test');
+const b5=AS.METRICS.find(m=>m.horizon==='5yr'&&m.model==='Persistence'&&m.split==='test');
+document.getElementById('chHorizonNote').textContent=
+ `Macro-F1 falls from ${rf1.macro_f1} at one year to ${rf5.macro_f1} at five. `+
+ `More countries change tier over five years, and fewer complete records exist to learn from.`;
+Plotly.newPlot('chHorizon',[
+ {x:['1 year','5 years'],y:[rf1.macro_f1,rf5.macro_f1],type:'bar',name:'Random Forest',marker:{color:'#175487'},text:[rf1.macro_f1,rf5.macro_f1],textposition:'outside'},
+ {x:['1 year','5 years'],y:[rf1.high_recall,rf5.high_recall],type:'bar',name:'Recall (High)',marker:{color:'#D64550'}},
+ {x:['1 year','5 years'],y:[b1.macro_f1,b5.macro_f1],type:'scatter',mode:'lines+markers',name:'baseline',line:{color:'#333',dash:'dash'}}
+],{...LAYOUT,yaxis:{range:[0.6,1],title:'score'},legend:{orientation:'h',y:1.15}},PLOTCFG);
+
+// ---- Section 1b: tier change rate ----
+const tc=AS.HOMESTATS.tier_change;
+Plotly.newPlot('chChange',[{x:['1 year','5 years'],y:[tc['1yr'],tc['5yr']],type:'bar',
+ marker:{color:['#1A9E77','#E6A817']},text:[tc['1yr']+'%',tc['5yr']+'%'],textposition:'outside'}],
+ {...LAYOUT,yaxis:{range:[0,Math.max(20,tc['5yr']*1.3)],title:'% of countries that change tier'}},PLOTCFG);
+
+// ---- Section 2: model tables ----
+function metricTable(h){
+ const rows=AS.METRICS.filter(m=>m.horizon===h&&m.split==='test');
+ return '<thead><tr><th>Model</th><th>Accuracy</th><th>Macro-F1</th><th>Recall (High)</th></tr></thead><tbody>'+
+  rows.map(m=>{const best=m.model==='Random Forest';
+   return `<tr style="${best?'background:rgba(23,84,135,.08);font-weight:600':''}"><td>${m.model}</td>
+    <td>${Math.round(m.accuracy*100)}%</td><td>${m.macro_f1.toFixed(3)}</td><td>${Math.round(m.high_recall*100)}%</td></tr>`;}).join('')+'</tbody>';
+}
+document.getElementById('tbl1').innerHTML=metricTable('1yr');
+document.getElementById('tbl5').innerHTML=metricTable('5yr');
+document.getElementById('scoreboardNote').innerHTML=
+ `Random Forest reaches recall (High) of ${Math.round(rf1.high_recall*100)}% at one year and `+
+ `${Math.round(rf5.high_recall*100)}% at five. At one year its margin over the persistence baseline `+
+ `is small (${rf1.macro_f1} vs ${b1.macro_f1}); the clearer gain is at five years `+
+ `(${rf5.macro_f1} vs ${b5.macro_f1}).`;
+
+// ---- Section 2b: F-beta, recall weighted twice as heavily as precision ------
+// beta = 1 is macro-F1 (already in the table above), so only F2 is stored; the
+// macro-F1 column here is read back from METRICS so the two are side by side.
+function fbetaTable(h){
+ const rows=(AS.FBETA||[]).filter(r=>r.horizon===h&&r.beta===2);
+ if(!rows.length)return '<tbody><tr><td>F-beta not available in this data file</td></tr></tbody>';
+ const mf1=m=>{const r=AS.METRICS.find(x=>x.horizon===h&&x.split==='test'&&x.model===m);return r?r.macro_f1:null;};
+ const bestHigh=Math.max(...rows.map(r=>r.high_fbeta));
+ return '<thead><tr><th>Model</th><th>Macro-F1</th><th>Macro-F2</th><th>High F2</th></tr></thead><tbody>'+
+  rows.map(r=>{const win=r.high_fbeta===bestHigh, f1=mf1(r.model);
+   return `<tr style="${win?'background:rgba(214,69,80,.10);font-weight:600':''}"><td>${r.model}</td>
+    <td>${f1==null?'&mdash;':f1.toFixed(3)}</td><td>${r.macro_fbeta.toFixed(3)}</td>
+    <td>${r.high_fbeta.toFixed(3)}</td></tr>`;}).join('')+'</tbody>';
+}
+document.getElementById('tblFb1').innerHTML=fbetaTable('1yr');
+document.getElementById('tblFb5').innerHTML=fbetaTable('5yr');
+(function(){
+ const el=document.getElementById('fbetaNote'); if(!el)return;
+ const g=(h,m)=>{const r=(AS.FBETA||[]).find(x=>x.horizon===h&&x.beta===2&&x.model===m);return r?r.high_fbeta:null;};
+ const lr=g('1yr','Logistic Regression'), rf=g('1yr','Random Forest');
+ if(lr==null||rf==null){el.innerHTML='Highlighted row = best F<sub>2</sub> on the High tier.';return;}
+ el.innerHTML=`Highlighted row = best F<sub>2</sub> on the High tier. The ranking is not the same as it
+  was under macro-F1. Random Forest still leads overall, but at one year Logistic Regression reaches an
+  F<sub>2</sub> of ${lr.toFixed(3)} on the High tier against Random Forest's ${rf.toFixed(3)} &mdash; so if
+  catching high-risk countries were the only thing that mattered, the simpler model would be the better
+  choice. That is the point of reporting F<sub>&beta;</sub> instead of assuming one metric settles it.`;
+})();
+
+// ---- Section 2c: class_weight sweep --------------------------------------
+// Validation-split figures. Each model family responds differently, so the
+// table is per model and the winner is picked by High F2 (the metric that
+// encodes "a missed warning costs more than a false alarm").
+const CW=AS.CWEIGHTS||[];
+let cwModel=(CW.find(r=>r.model==='Logistic Regression')?'Logistic Regression':(CW[0]||{}).model)||'';
+function cwTable(h){
+ const rows=CW.filter(r=>r.horizon===h&&r.model===cwModel);
+ if(!rows.length)return '<tbody><tr><td>No class-weight data in this data file</td></tr></tbody>';
+ const best=Math.max(...rows.map(r=>r.high_fbeta));
+ return '<thead><tr><th>class_weight</th><th>Macro-F1</th><th>Precision (High)</th>'+
+        '<th>Recall (High)</th><th>High F2</th></tr></thead><tbody>'+
+  rows.map(r=>{const win=r.high_fbeta===best;
+   return `<tr style="${win?'background:rgba(214,69,80,.10);font-weight:600':''}">
+    <td>${r.class_weight}</td><td>${r.macro_f1.toFixed(3)}</td>
+    <td>${r.high_precision.toFixed(3)}</td><td>${r.high_recall.toFixed(3)}</td>
+    <td>${r.high_fbeta.toFixed(3)}</td></tr>`;}).join('')+'</tbody>';
+}
+function drawCw(){
+ document.getElementById('tblCw1').innerHTML=cwTable('1yr');
+ document.getElementById('tblCw5').innerHTML=cwTable('5yr');
+ document.querySelectorAll('#cwTabs button').forEach(b=>b.classList.toggle('on',b.dataset.m===cwModel));
+ const one=CW.filter(r=>r.horizon==='1yr'&&r.model===cwModel);
+ const el=document.getElementById('cwNote'); if(!el||!one.length)return;
+ const lo=one.find(r=>r.class_weight==='none'), hi=one.find(r=>r.class_weight==='High x5');
+ const best=one.reduce((a,b)=>b.high_fbeta>a.high_fbeta?b:a);
+ const moved=lo&&hi?Math.abs(hi.high_recall-lo.high_recall):0;
+ el.innerHTML=`Highlighted row = best High F<sub>2</sub>. `+(moved<0.01
+  ? `For ${cwModel} the weighting barely moves anything at one year — recall stays near
+     ${(lo?lo.high_recall:0).toFixed(3)} whatever weight it is given. A deep forest on a
+     well-separated signal is already confident, so re-weighting the classes changes few decisions.
+     That is a real result: this knob is not where the gain is for this model.`
+  : `For ${cwModel}, raising the weight on High moves recall from ${lo.high_recall.toFixed(3)}
+     (no weighting) to ${hi.high_recall.toFixed(3)} (High&nbsp;&times;5), while precision falls from
+     ${lo.high_precision.toFixed(3)} to ${hi.high_precision.toFixed(3)}. Best F<sub>2</sub> here is
+     <strong>${best.class_weight}</strong> at ${best.high_fbeta.toFixed(3)} — past that point the extra
+     weight only buys false alarms.`);
+}
+(function(){
+ const models=[...new Set(CW.map(r=>r.model))];
+ document.getElementById('cwTabs').innerHTML=models.map(m=>
+   `<button data-m="${m}">${m}</button>`).join('');
+ document.querySelectorAll('#cwTabs button').forEach(b=>b.onclick=()=>{cwModel=b.dataset.m;drawCw();});
+ drawCw();
+})();
+
+// ---- Section 3: SHAP importance both horizons ----
+const feats=Object.keys(AS.SHAP['1yr']).sort((a,b)=>AS.SHAP['1yr'][b]-AS.SHAP['1yr'][a]);
+Plotly.newPlot('chShap',[
+ {y:feats.map(f=>AS.NICE[f]||f).reverse(),x:feats.map(f=>AS.SHAP['1yr'][f]).reverse(),type:'bar',orientation:'h',name:'1-year',marker:{color:'#175487'}},
+ {y:feats.map(f=>AS.NICE[f]||f).reverse(),x:feats.map(f=>AS.SHAP['5yr'][f]||0).reverse(),type:'bar',orientation:'h',name:'5-year',marker:{color:'#E6A817'}}
+],{...LAYOUT,barmode:'group',xaxis:{title:'impact on the forecast'},legend:{orientation:'h',y:1.08},margin:{l:150,r:20,t:30,b:40}},PLOTCFG);
+
+// ---- Section 4: how we tested it -------------------------------------------
+let eH='1yr';
+function drawEval(){
+ const E=(AS.EVAL||{})[eH]; if(!E)return;
+ const T=E.tiers, cm=E.confusion, yr=eH==='1yr'?NEXT_YEAR:TARGET_YEAR;
+ const max=Math.max(...cm.flat());
+
+ // confusion matrix as a real grid: the two corner cells are the ones that
+ // matter, so they are called out rather than buried in a heatmap
+ let g='<div style="display:grid;grid-template-columns:auto repeat(3,1fr);gap:4px;font-size:.84rem">'
+  +'<div></div>'+T.map(t=>`<div style="text-align:center;font-size:.68rem;font-weight:700;
+     color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding-bottom:.2rem">
+     predicted ${t}</div>`).join('');
+ cm.forEach((row,i)=>{
+  g+=`<div style="display:flex;align-items:center;justify-content:flex-end;padding-right:.6rem;
+      font-size:.68rem;font-weight:700;color:var(--muted);text-transform:uppercase;
+      letter-spacing:.5px;white-space:nowrap">actual ${T[i]}</div>`;
+  row.forEach((v,j)=>{
+   const diag=i===j, corner=(i===2&&j===0)||(i===0&&j===2), zero=v===0;
+   const bg=diag?`color-mix(in srgb, ${TC[T[i]]} ${Math.round(18+62*v/max)}%, #fff)`
+          :(corner?(zero?'#F2FAF6':'#FDECEE'):'var(--mist)');
+   g+=`<div style="background:${bg};border-radius:9px;padding:.75rem .4rem;text-align:center;
+       ${corner?'border:1.5px dashed '+(zero?'#1A9E77':'#D64550')+';':'border:1px solid transparent;'}">
+       <div style="font-family:var(--serif);font-size:1.3rem;font-weight:700;
+         color:${diag?'#fff':(corner&&zero?'#1A9E77':'var(--ink)')}">${v}</div></div>`;});});
+ g+='</div>';
+ document.getElementById('cmWrap').innerHTML=g;
+ const hiLo=cm[2][0], loHi=cm[0][2];
+ document.getElementById('cmNote').innerHTML=
+  `${E.n_test} test country-years. The dashed corners are the errors that jump a whole tier:
+   a genuinely high-risk country called <b>Low</b> is <b>${hiLo}</b>, and a low-risk country
+   called High is <b>${loHi}</b>. ${hiLo===0?'The dangerous mistake never happened — every error is between neighbouring tiers.':''}`;
+
+ // per-class table
+ document.getElementById('tblClass').innerHTML=
+  '<thead><tr><th>Tier</th><th>Precision</th><th>Recall</th><th>F1</th><th>Support</th></tr></thead><tbody>'
+  +T.map(t=>{const c=E.per_class[t];
+    return `<tr><td><span class="badge" style="background:${TC[t]};font-size:.72rem">${t}</span></td>
+    <td>${c.precision.toFixed(3)}</td><td>${c.recall.toFixed(3)}</td>
+    <td>${c.f1.toFixed(3)}</td><td style="color:var(--muted)">${c.support}</td></tr>`;}).join('')
+  +'</tbody>';
+
+ // bootstrap intervals — error bars, the honest-reporting centrepiece
+ const R=E.rf_ci,B=E.base_ci;
+ Plotly.react('chCI',[{type:'scatter',mode:'markers',orientation:'h',
+   y:['Random Forest','Persistence baseline'],x:[R.point,B.point],
+   marker:{color:['#175487','#8B93A7'],size:13},
+   error_x:{type:'data',symmetric:false,
+     array:[R.ci_hi-R.point,B.ci_hi-B.point],
+     arrayminus:[R.point-R.ci_lo,B.point-B.ci_lo],
+     color:'#5B6B7C',thickness:2,width:7}}],
+  {...LAYOUT,xaxis:{title:'macro-F1 (95% interval)'},margin:{l:150,r:26,t:14,b:44}},PLOTCFG);
+ document.getElementById('ciNote').innerHTML=
+  `Resampling the test set 1,000 times gives Random Forest <b>[${R.ci_lo}, ${R.ci_hi}]</b> and the
+   baseline <b>[${B.ci_lo}, ${B.ci_hi}]</b>. ${E.ci_overlap
+    ? 'These intervals <b>overlap</b>, so the difference is <b>not statistically significant</b> — reported openly rather than presented as a win.'
+    : 'These intervals do <b>not</b> overlap, so the gain is statistically real.'}`;
+
+ // threshold sweep
+ const S=E.threshold.sweep;
+ Plotly.react('chThresh',[
+  {x:S.map(r=>r.threshold),y:S.map(r=>r.high_recall),mode:'lines+markers',name:'Recall (High)',
+   line:{color:'#D64550',width:2.5}},
+  {x:S.map(r=>r.threshold),y:S.map(r=>r.high_precision),mode:'lines+markers',name:'Precision (High)',
+   line:{color:'#175487',width:2.5}}],
+  {...LAYOUT,xaxis:{title:'decision threshold'},yaxis:{range:[.6,1.04]},
+   legend:{orientation:'h',y:1.22},margin:{l:48,r:20,t:34,b:44},
+   shapes:[{type:'line',x0:E.threshold.chosen,x1:E.threshold.chosen,y0:0,y1:1,yref:'paper',
+     line:{color:'#1A9E77',dash:'dash',width:1.5}}]},PLOTCFG);
+ document.getElementById('thNote').innerHTML=
+  `Missing a high-risk country costs more than a false alarm, so the threshold is the
+   <b>lowest</b> one keeping precision at or above 0.70 — <b>${E.threshold.chosen}</b> (green line).
+   Applied once to the test set it gives recall <b>${E.threshold.test_recall}</b> and precision
+   <b>${E.threshold.test_precision}</b> on ${yr} High-risk countries.`;
+
+ document.querySelectorAll('.echip').forEach(c=>c.classList.toggle('on',c.dataset.e===eH));
+}
+document.querySelectorAll('.echip').forEach(c=>c.onclick=()=>{eH=c.dataset.e;drawEval();});
+drawEval();
+
+// ---- forecast accuracy by indicator (was exported but never shown) ----
+(()=>{const F=AS.FCMETRICS||[];if(!F.length)return;
+ const inds=[...new Set(F.map(r=>r.indicator))];
+ const g=h=>inds.map(i=>{const r=F.find(x=>x.indicator===i&&x.horizon===h);return r?r.r2:null;});
+ Plotly.newPlot('chFC',[
+  {x:inds.map(i=>AS.NICE[i]||i),y:g('1yr'),type:'bar',name:'1-year',marker:{color:'#175487'},
+   text:g('1yr').map(v=>v==null?'':v.toFixed(2)),textposition:'outside'},
+  {x:inds.map(i=>AS.NICE[i]||i),y:g('5yr'),type:'bar',name:'5-year',marker:{color:'#E6A817'},
+   text:g('5yr').map(v=>v==null?'':v.toFixed(2)),textposition:'outside'}],
+  {...LAYOUT,barmode:'group',yaxis:{title:'R² on the test set',range:[-.45,1.15]},
+   legend:{orientation:'h',y:1.16},margin:{l:56,r:20,t:34,b:66},
+   shapes:[{type:'line',x0:-.5,x1:inds.length-.5,y0:0,y1:0,line:{color:'#8B93A7',width:1}}]},PLOTCFG);
+ const worst=F.reduce((a,r)=>r.r2<a.r2?r:a,F[0]);
+ document.getElementById('fcNote').innerHTML=
+  `Each indicator gets its own regressor. Slow-moving quantities are predicted almost perfectly;
+   <b>${AS.NICE[worst.indicator]||worst.indicator}</b> at five years is the honest failure —
+   R² <b>${worst.r2}</b>, below zero, meaning it is <b>worse than predicting the average</b>.
+   It is reported rather than dropped.`;})();
+
+
+</script>
+</body>
+</html>

@@ -1,0 +1,69 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agrisentinel"
+version = "1.1.0"
+description = "An explainable early-warning system for national food-security risk"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Soe Sett Lynn" }]
+keywords = ["food-security", "early-warning", "explainable-ai", "shap", "data-mining"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+# Kept in sync with requirements.txt on purpose: requirements.txt is what a human
+# or Colab installs from directly, while this section is what `pip install -e .`
+# resolves for the desktop/PyCharm project. They pin the same versions.
+dependencies = [
+    "pandas==2.2.2",
+    "numpy==2.0.2",
+    "scikit-learn==1.6.1",
+    "matplotlib==3.10.0",
+    "mlxtend",
+    "shap",
+    "country_converter",
+    "requests",
+    "joblib",
+    "pyyaml",
+]
+
+[project.urls]
+Homepage = "https://predictagrisentinel.netlify.app/"
+Repository = "https://github.com/ssettlynn/AgriSentinel"
+Report = "https://github.com/ssettlynn/AgriSentinel/blob/main/docs/AgriSentinel_Project_Book.pdf"
+
+[project.optional-dependencies]
+dev = ["pytest", "nbclient", "nbformat", "jupyter"]
+
+[project.scripts]
+# After `pip install -e .`, the whole pipeline runs as a single command —
+# no notebook required. This is the literal proof that PyCharm and Colab
+# share one implementation: both invoke src/agrisentinel, never a second copy.
+agrisentinel-run = "scripts.run_pipeline:main"
+
+[tool.setuptools]
+packages = ["config", "src.agrisentinel", "scripts"]
+package-dir = { "" = "." }
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# Silence the spurious floating-point flags NumPy 2.x raises from BLAS matmul
+# under Apple's Accelerate backend (macOS only). They are false positives — the
+# numeric results are correct and the same code is clean on Colab/Linux — so they
+# are scoped to these exact messages, never a blanket warning filter.
+filterwarnings = [
+    "ignore:divide by zero encountered in matmul:RuntimeWarning",
+    "ignore:overflow encountered in matmul:RuntimeWarning",
+    "ignore:invalid value encountered in matmul:RuntimeWarning",
+    "ignore:divide by zero encountered in vecdot:RuntimeWarning",
+    "ignore:overflow encountered in vecdot:RuntimeWarning",
+    "ignore:invalid value encountered in vecdot:RuntimeWarning",
+    "ignore:Unknown solver options",
+]

@@ -1,0 +1,65 @@
+# ---------------------------------------------------------------------------
+# data/raw/ is INTENTIONALLY NOT ignored.
+#
+# The pinned FAOSTAT + World Bank snapshot (a few MB, manifest + checksummed)
+# is the one thing that must survive a fresh clone: FAOSTAT revises its bulk
+# file in place with no version number, so "download fresh and hope" is not
+# reproducible. Everything downstream of data/raw/ regenerates deterministically
+# from it via `python scripts/run_pipeline.py`, so only the downstream
+# artifacts are ignored below.
+#
+# The one exception: the FAOSTAT bulk CSV is committed as the ~2 MB zip it
+# ships as. Its ~50 MB extracted form is a build artifact.
+# ---------------------------------------------------------------------------
+data/raw/**/Food_Security_Data_E_All_Data_Normalized/
+
+# --- regenerable data/model artifacts (reproduced by scripts/run_pipeline.py) ---
+data/interim/*
+data/processed/*
+!data/interim/.gitkeep
+!data/processed/.gitkeep
+models/*
+!models/.gitkeep
+
+# --- generated reports (figures/metrics regenerate on every run) ---
+reports/figures/*.png
+reports/metrics/*.json
+reports/book_figures/
+!reports/figures/.gitkeep
+!reports/metrics/.gitkeep
+
+# --- generated UI data contract (the one file dashboard_export.py writes) ---
+site/agrisentinel_data.js
+
+# --- notebook execution artifacts (outputs are useful in git; caches are not) ---
+notebooks/.ipynb_checkpoints/
+
+# --- Python ---
+__pycache__/
+*.pyc
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.venv/
+.venv*/
+venv/
+env/
+
+# --- Node ---
+node_modules/
+
+# --- coursework drafts and exports (the final report lives in docs/) ---
+*.pptx
+/*.docx
+/*.pdf
+~$*
+
+# --- tooling / IDE / OS ---
+.claude/
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

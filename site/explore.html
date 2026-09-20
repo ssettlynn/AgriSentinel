@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>World Map — AgriSentinel</title>
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=17">
+<script src="plotly.min.js"></script>
+<script src="agrisentinel_data.js"></script>
+<script src="agrisentinel.js?v=17"></script>
+</head>
+<body>
+<script>asNav('explore.html',false)</script>
+
+<div class="pagehead">
+  <img class="bgart" src="assets/earth.svg" alt="">
+  <div class="wrap">
+    <div class="eyebrow" style="color:#FFD86B">Interactive Map</div>
+    <h1>The world, year by year</h1>
+    <p>Drag the slider — or press Play — and watch a decade of progress and its reversal.
+       The analysis behind the map is on the <a href="descriptive.html" style="color:#FFD86B">Descriptive</a> page.</p>
+  </div>
+</div>
+
+<section>
+  <div class="wrap">
+    <div class="card rv">
+      <div class="tbar">
+        <div class="seg">
+          <button class="modechip on" data-mode="hist"><span id="histLabel">History</span></button>
+          <button class="modechip" data-mode="next"><span id="nextLabel">next year</span></button>
+          <button class="modechip fc" data-mode="fore"><span id="foreLabel">forecast</span></button>
+        </div>
+        <b style="font-family:var(--serif);font-size:1.35rem" id="mapYearLab"></b>
+        <span class="tagfc" id="fcTag" style="display:none">Model forecast</span>
+        <input type="range" id="mapYear" min="2010" max="2010" value="2010" style="flex:1;min-width:200px">
+        <button class="chip" id="playBtn"><script>document.write(icn('play',14))</script> Play</button>
+      </div>
+      <div class="kgrid" id="mapKpis"></div>
+      <div id="worldMap" style="height:400px"></div>
+      <div style="display:flex;gap:1.6rem;flex-wrap:wrap;align-items:center;
+                  margin-top:.9rem;padding-top:.9rem;border-top:1px solid var(--line);
+                  font-size:.86rem;font-weight:600">
+        <span><i style="display:inline-block;width:11px;height:11px;border-radius:50%;
+          background:var(--teal);margin-right:.5rem"></i>Food-secure</span>
+        <span><i style="display:inline-block;width:11px;height:11px;border-radius:50%;
+          background:var(--amber);margin-right:.5rem"></i>At risk</span>
+        <span><i style="display:inline-block;width:11px;height:11px;border-radius:50%;
+          background:var(--red);margin-right:.5rem"></i>Serious hunger</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+<script>asFooter()</script>
+<script>
+document.getElementById('histLabel').textContent = 'History ' + AS.GLOB.years[0] + '–' + AS.GLOB.latest_year;
+document.getElementById('foreLabel').textContent = TARGET_YEAR + ' forecast';
+document.getElementById('nextLabel').textContent = NEXT_YEAR + ' forecast';
+const yEl0=document.getElementById('mapYear');
+yEl0.min=AS.GLOB.years[0];yEl0.max=AS.GLOB.latest_year;yEl0.value=AS.GLOB.latest_year;
+document.getElementById('mapYearLab').textContent=AS.GLOB.latest_year;
+
+let mapMode='hist';
+function yearData(y){const iso=[],z=[],txt=[],pou=[];
+ ISOs.forEach(c=>{const s=AS.SERIES[c],i=s.y.indexOf(y);
+  if(i>-1&&s.tier[i]){iso.push(c);z.push(TIERS.indexOf(s.tier[i]));
+   txt.push(`<b>${AS.META[c].n}</b><br>Hunger: ${s.pou[i]}%<br>Tier: ${s.tier[i]}`);pou.push(s.pou[i]);}});
+ return{iso,z,txt,pou};}
+function foreData(){const iso=[],z=[],txt=[];const yr=String(TARGET_YEAR);
+ ISOs.forEach(c=>{const o=AS.OUTLOOK[c]&&AS.OUTLOOK[c][yr];if(!o)return;
+  iso.push(c);z.push(TIERS.indexOf(o.t));
+  txt.push(`<b>${AS.META[c].n}</b><br>${TARGET_YEAR} forecast: ${o.t}`);});
+ return{iso,z,txt};}
+// NEXT_YEAR sits between the last history year and the 5-year outlook; without
+// it the map jumps 2023 -> 2028 and the nearest forecast is invisible.
+function nextData(){const iso=[],z=[],txt=[];
+ ISOs.forEach(c=>{const p=AS.PRED[c];if(!p||!p.rf)return;
+  iso.push(c);z.push(TIERS.indexOf(p.rf.t));
+  txt.push(`<b>${AS.META[c].n}</b><br>${NEXT_YEAR} forecast: ${p.rf.t}`);});
+ return{iso,z,txt};}
+function renderMap(d){
+ Plotly.react('worldMap',[{type:'choropleth',locations:d.iso,z:d.z,text:d.txt,hoverinfo:'text',
+  zmin:0,zmax:2,colorscale:[[0,TC.Low],[.5,TC.Medium],[1,TC.High]],showscale:false,
+  marker:{line:{color:'#fff',width:.5}}}],
+  {...LAYOUT,geo:{projection:{type:'natural earth'},showframe:false,landcolor:'#E8EDF2',bgcolor:'rgba(0,0,0,0)'},
+   margin:{l:0,r:0,t:0,b:0}},PLOTCFG);}
+function drawMap(y){const d=yearData(y);renderMap(d);
+ document.getElementById('mapKpis').innerHTML=
+  `<div class="kpi"><div class="n" style="color:${TC.High}">${d.z.filter(v=>v===2).length}</div><div class="l">serious hunger</div></div>
+   <div class="kpi"><div class="n" style="color:${TC.Medium}">${d.z.filter(v=>v===1).length}</div><div class="l">vulnerable</div></div>
+   <div class="kpi"><div class="n" style="color:${TC.Low}">${d.z.filter(v=>v===0).length}</div><div class="l">food-secure</div></div>
+   <div class="kpi"><div class="n">${(d.pou.reduce((a,b)=>a+b,0)/d.pou.length).toFixed(1)}%</div><div class="l">average hunger</div></div>`;}
+function drawFcMap(d,yr){renderMap(d);
+ document.getElementById('mapKpis').innerHTML=
+  `<div class="kpi fc"><div class="n" style="color:${TC.High}">${d.z.filter(v=>v===2).length}</div><div class="l">serious hunger by ${yr}</div></div>
+   <div class="kpi fc"><div class="n" style="color:${TC.Medium}">${d.z.filter(v=>v===1).length}</div><div class="l">vulnerable by ${yr}</div></div>
+   <div class="kpi fc"><div class="n" style="color:${TC.Low}">${d.z.filter(v=>v===0).length}</div><div class="l">food-secure by ${yr}</div></div>
+   <div class="kpi fc"><div class="n" style="color:var(--violet)">${d.iso.length}</div><div class="l">countries forecast</div></div>`;}
+const yEl=document.getElementById('mapYear');
+yEl.oninput=()=>{document.getElementById('mapYearLab').textContent=yEl.value;drawMap(+yEl.value);};
+const playLbl=on=>document.getElementById('playBtn').innerHTML=(on?icn('pause',15)+' Pause':icn('play',15)+' Play');
+function setMode(mode){mapMode=mode;
+ document.querySelectorAll('.modechip').forEach(c=>c.classList.toggle('on',c.dataset.mode===mode));
+ const fore=mode!=='hist';
+ yEl.disabled=fore;yEl.style.opacity=fore?.35:1;
+ document.getElementById('playBtn').style.display=fore?'none':'';
+ document.getElementById('fcTag').style.display=fore?'':'none';
+ if(fore){if(playing){clearInterval(playing);playing=null;playLbl(false);}
+  const yr=mode==='next'?NEXT_YEAR:TARGET_YEAR;
+  document.getElementById('mapYearLab').textContent=yr;
+  drawFcMap(mode==='next'?nextData():foreData(),yr);}
+ else{document.getElementById('mapYearLab').textContent=yEl.value;drawMap(+yEl.value);}}
+document.querySelectorAll('.modechip').forEach(ch=>ch.onclick=()=>setMode(ch.dataset.mode));
+drawMap(AS.GLOB.latest_year);
+let playing=null;
+document.getElementById('playBtn').onclick=function(){
+ if(playing){clearInterval(playing);playing=null;playLbl(false);return;}
+ playLbl(true);let y=AS.GLOB.years[0];
+ playing=setInterval(()=>{yEl.value=y;yEl.oninput();y++;if(y>AS.GLOB.latest_year){clearInterval(playing);playing=null;
+  playLbl(false);}},650);};
+
+</script>
+</body>
+</html>

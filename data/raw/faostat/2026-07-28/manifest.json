@@ -1,0 +1,20 @@
+{
+  "source_url": "https://bulks-faostat.fao.org/production/Food_Security_Data_E_All_Data_(Normalized).zip",
+  "retrieved_at": "2026-07-28T05:38:17.055881+00:00",
+  "files": {
+    "Food_Security_Data_E_All_Data_(Normalized).csv": {
+      "sha256": "abf2baa282e104e02b7c42ec2224c0b0909f391a3b50ae4a7da51cc3ef6bbe36",
+      "bytes": 52366034
+    }
+  },
+  "encoding_used": "utf-8",
+  "area_count": 246,
+  "row_count": 287735,
+  "turkiye_present": true,
+  "items_found": {
+    "Prevalence of undernourishment (percent) (3-year average)": true,
+    "Average dietary energy supply adequacy (percent) (3-year average)": true,
+    "Cereal import dependency ratio (percent) (3-year average)": true,
+    "Per capita food supply variability (kcal/cap/day)": true
+  }
+}

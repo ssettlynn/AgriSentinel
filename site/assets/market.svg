@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+<defs>
+<linearGradient id="warm" x1="0" y1="0" x2="0" y2="1">
+ <stop offset="0" stop-color="#B85A22"/><stop offset=".55" stop-color="#D07B33"/>
+ <stop offset="1" stop-color="#8F4A1D"/>
+</linearGradient>
+<linearGradient id="table" x1="0" y1="0" x2="0" y2="1">
+ <stop offset="0" stop-color="#7A4A1E"/><stop offset="1" stop-color="#5C3714"/>
+</linearGradient>
+<filter id="soft2"><feGaussianBlur stdDeviation="3"/></filter>
+</defs>
+
+<rect width="1920" height="1080" fill="url(#warm)"/>
+
+<!-- sun glow top -->
+<circle cx="960" cy="-160" r="560" fill="#FFD86B" opacity=".3" filter="url(#soft2)"/>
+
+<!-- awning -->
+<g>
+ <rect x="0" y="0" width="1920" height="190" fill="#B23A48"/>
+ <g fill="#F3E4CF">
+  <rect x="120" y="0" width="120" height="190"/><rect x="360" y="0" width="120" height="190"/>
+  <rect x="600" y="0" width="120" height="190"/><rect x="840" y="0" width="120" height="190"/>
+  <rect x="1080" y="0" width="120" height="190"/><rect x="1320" y="0" width="120" height="190"/>
+  <rect x="1560" y="0" width="120" height="190"/><rect x="1800" y="0" width="120" height="190"/>
+ </g>
+ <path d="M0,190 q60,46 120,0 q60,46 120,0 q60,46 120,0 q60,46 120,0 q60,46 120,0 q60,46 120,0 q60,46 120,0 q60,46 120,0 q60,46 120,0 q60,46 120,0 q60,46 120,0 q60,46 120,0 q60,46 120,0 q60,46 120,0 q60,46 120,0 q60,46 120,0 L1920,120 L0,120Z"
+   fill="#B23A48"/>
+</g>
+
+<!-- market table -->
+<rect x="0" y="640" width="1920" height="90" fill="url(#table)"/>
+<rect x="0" y="730" width="1920" height="350" fill="#4A2C10"/>
+
+<!-- produce baskets: grains -->
+<g>
+ <path d="M120,640 a150,80 0 0 1 300,0Z" fill="#A9781F"/>
+ <g fill="#F2CB60"><circle cx="200" cy="590" r="14"/><circle cx="240" cy="575" r="14"/><circle cx="285" cy="568" r="14"/>
+  <circle cx="330" cy="576" r="14"/><circle cx="368" cy="592" r="14"/><circle cx="265" cy="592" r="14"/><circle cx="308" cy="592" r="14"/></g>
+</g>
+<!-- tomatoes -->
+<g>
+ <path d="M500,640 a150,80 0 0 1 300,0Z" fill="#8F3B22"/>
+ <g fill="#D64550"><circle cx="580" cy="592" r="20"/><circle cx="630" cy="574" r="20"/><circle cx="685" cy="568" r="20"/>
+  <circle cx="735" cy="580" r="20"/><circle cx="660" cy="600" r="20"/><circle cx="712" cy="602" r="19"/></g>
+ <g fill="#1A9E77"><circle cx="630" cy="560" r="5"/><circle cx="685" cy="554" r="5"/></g>
+</g>
+<!-- greens -->
+<g>
+ <path d="M880,640 a150,80 0 0 1 300,0Z" fill="#28623F"/>
+ <g fill="#2FA05C"><ellipse cx="960" cy="585" rx="26" ry="18"/><ellipse cx="1015" cy="570" rx="26" ry="18"/>
+  <ellipse cx="1070" cy="578" rx="26" ry="18"/><ellipse cx="1040" cy="600" rx="24" ry="16"/><ellipse cx="985" cy="604" rx="24" ry="16"/></g>
+ <g stroke="#1C7A42" stroke-width="3" fill="none">
+  <path d="M948,585 q12,-8 24,0"/><path d="M1003,570 q12,-8 24,0"/><path d="M1058,578 q12,-8 24,0"/></g>
+</g>
+<!-- oranges -->
+<g>
+ <path d="M1260,640 a150,80 0 0 1 300,0Z" fill="#9C5A16"/>
+ <g fill="#E6A817"><circle cx="1340" cy="590" r="19"/><circle cx="1390" cy="572" r="19"/><circle cx="1445" cy="567" r="19"/>
+  <circle cx="1495" cy="580" r="19"/><circle cx="1420" cy="598" r="19"/><circle cx="1470" cy="602" r="18"/></g>
+</g>
+<!-- rice sacks -->
+<g>
+ <path d="M1650,640 q-10,-110 60,-120 q70,10 60,120Z" fill="#D9C39A"/>
+ <path d="M1770,640 q-10,-96 52,-106 q62,10 52,106Z" fill="#C9B283"/>
+ <path d="M1660,540 q50,-16 100,0" stroke="#8F7748" stroke-width="6" fill="none"/>
+ <ellipse cx="1710" cy="560" rx="34" ry="10" fill="#F2E4C4"/>
+</g>
+
+<!-- hanging lamps -->
+<g>
+ <line x1="480" y1="190" x2="480" y2="300" stroke="#3A2410" stroke-width="6"/>
+ <circle cx="480" cy="330" r="34" fill="#FFD86B" filter="url(#soft2)"/>
+ <line x1="1440" y1="190" x2="1440" y2="280" stroke="#3A2410" stroke-width="6"/>
+ <circle cx="1440" cy="310" r="30" fill="#FFD86B" filter="url(#soft2)"/>
+</g>
+
+<!-- price tags -->
+<g font-family="Georgia,serif" font-size="30" fill="#4A2C10" text-anchor="middle">
+ <rect x="235" y="655" width="90" height="44" rx="8" fill="#F3E4CF"/>
+ <rect x="615" y="655" width="90" height="44" rx="8" fill="#F3E4CF"/>
+ <rect x="995" y="655" width="90" height="44" rx="8" fill="#F3E4CF"/>
+ <rect x="1375" y="655" width="90" height="44" rx="8" fill="#F3E4CF"/>
+</g>
+</svg>

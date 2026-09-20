@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What-If Lab — AgriSentinel</title>
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=17">
+<script src="plotly.min.js"></script>
+<script src="agrisentinel_data.js"></script>
+<script src="agrisentinel.js?v=17"></script>
+</head>
+<body>
+<script>asNav('lab.html',false)</script>
+
+<div class="pagehead">
+  <div class="wrap">
+    <div class="eyebrow" style="color:#FFD86B">Play With The Model</div>
+    <h1>The What-If Lab</h1>
+    <p>Two real models running live in your browser. Start from a country's actual situation,
+       drag the sliders, and watch its next-year and five-year outlooks change.</p>
+  </div>
+</div>
+
+<section>
+  <div class="wrap">
+    <div class="card rv">
+      <div style="display:flex;gap:1.2rem;flex-wrap:wrap">
+        <select id="wCountry" style="min-width:260px"></select>
+        <button class="chip" id="wReset"><script>document.write(icn('reset',15))</script> Reset to real values</button>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:0 2.6rem" id="wSliders"></div>
+    </div>
+
+    <!-- ZONE 1 — YOUR SCENARIO: driven by the sliders. The caveat belongs
+         directly under this, not at the foot of the page, where it wrongly
+         claimed the real-data card below was a sandbox too. -->
+    <div style="display:grid;grid-template-columns:380px 1fr;gap:2rem;margin-top:2rem;align-items:center" id="wWrap">
+      <div class="card rv" id="wResult"></div>
+      <div class="card rv d1"><div id="wProbs" style="height:190px"></div></div>
+    </div>
+
+    <div class="explain rv d2" id="wCaveat"></div>
+
+    <!-- ZONE 2 — REAL DATA: trained-model output on the actual 2023 record.
+         The sliders do not touch this. -->
+    <div class="card rv d3" style="margin-top:2rem">
+      <div style="display:flex;gap:.9rem;align-items:flex-start;flex-wrap:wrap">
+        <div style="flex:1;min-width:240px">
+          <h3 style="font-family:var(--sans);font-size:1.02rem;margin:0" id="wForeTitle">Model forecasts for this country</h3>
+          <div style="color:var(--muted);font-size:.84rem;margin-top:.25rem" id="wForeSub"></div>
+        </div>
+        <span style="flex:none;display:inline-flex;align-items:center;gap:.4rem;
+          font-size:.68rem;font-weight:800;letter-spacing:.11em;text-transform:uppercase;
+          color:#1A7F62;background:#EAF7F1;border:1.5px solid #B9E3D2;
+          border-radius:999px;padding:.28rem .7rem">Real data</span>
+      </div>
+      <div id="wForeCards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.9rem;margin-top:1.2rem"></div>
+    </div>
+  </div>
+</section>
+
+<script>asFooter()</script>
+<script>
+// Scoped to the two result cards ABOVE it. The indicator forecasts further down
+// are real trained-model output, so this must not read as covering them.
+document.getElementById('wCaveat').innerHTML =
+ `<b>The two results above are a sandbox</b> — they come from the slider values you set,
+  not from verified data. The indicator forecasts below are the real thing.
+  Official forecasts are on the <a href="forecast.html">Forecast</a> page.`;
+document.getElementById('wForeSub').innerHTML =
+ `The trained models run on ${AS.GLOB.latest_year} real data &mdash; your sliders do not change these.`;
+const LR=AS.LOGREG,LR5=AS.LOGREG5,WFEAT=LR.features;
+const wSel=document.getElementById('wCountry');
+ISOs.filter(i=>AS.PRED[i]).map(i=>AS.META[i].n).sort().forEach(n=>{
+ const o=document.createElement('option');o.value=n;o.textContent=n;wSel.appendChild(o);});
+wSel.value = name2iso['Kenya'] ? 'Kenya' : wSel.options[0]?.value;
+const RANGES={pou:[0,80],des_adequacy:[60,170],cereal_import_dep:[-100,100],food_prod_var:[0,200],
+ gdp_per_capita:[200,60000],gdp_growth:[-20,20],inflation_cpi:[-5,100],pop_growth:[-3,6],pou_change:[-5,5]};
+function baseVals(){const iso=name2iso[wSel.value],s=AS.SERIES[iso],i=s.y.indexOf(AS.GLOB.latest_year),v={};
+ WFEAT.forEach((f,fi)=>{if(f==='covid_flag'){v[f]=0;return}
+  if(f==='pou_change'){const j=s.y.indexOf(AS.GLOB.latest_year-1);
+   v[f]=(i>-1&&j>-1&&s.pou[i]!=null&&s.pou[j]!=null)?+(s.pou[i]-s.pou[j]).toFixed(2):LR.medians[fi];return}
+  v[f]=(i>-1&&s[f]&&s[f][i]!=null)?s[f][i]:LR.medians[fi];});return v;}
+function buildSliders(){const v=baseVals(),wrap=document.getElementById('wSliders');wrap.innerHTML='';
+ Object.keys(RANGES).forEach(f=>{const[lo,hi]=RANGES[f],val=Math.min(Math.max(v[f],lo),hi);
+  wrap.insertAdjacentHTML('beforeend',
+   `<div><div class="sliderlab"><span>${LBL[f]}</span><b id="v_${f}">${(+val).toFixed(1)}</b></div>
+    <input type="range" id="s_${f}" min="${lo}" max="${hi}" step="${(hi-lo)/200}" value="${val}" style="width:100%">
+   </div>`);});
+ Object.keys(RANGES).forEach(f=>{document.getElementById('s_'+f).oninput=e=>{
+  document.getElementById('v_'+f).textContent=(+e.target.value).toFixed(1);predictWF();};});
+ predictWF();}
+function softmax(model,x){
+ const z=x.map((v,i)=>(v-model.mean[i])/model.scale[i]);
+ const sc=model.coef.map((row,c)=>row.reduce((a,w,i)=>a+w*z[i],model.intercept[c]));
+ const mx=Math.max(...sc),ex=sc.map(s=>Math.exp(s-mx)),sum=ex.reduce((a,b)=>a+b,0);
+ const pr=ex.map(e=>e/sum);
+ return {pr,best:model.classes[pr.indexOf(Math.max(...pr))],
+         conf:Math.max(...pr),ord:TIERS.map(t=>pr[model.classes.indexOf(t)])};}
+function predictWF(){const x=WFEAT.map(f=>f==='covid_flag'?0:+document.getElementById('s_'+f).value);
+ const r1=softmax(LR,x),r5=softmax(LR5,x);
+ const realP=AS.PRED[name2iso[wSel.value]],real=realP?realP.lr.t:'?';
+ const cell=(tag,label,r,note)=>
+  `<div style="flex:1;min-width:150px;text-align:center">
+    <span class="${tag}">${label}</span>
+    <div style="font-family:var(--serif);font-size:1.9rem;font-weight:700;color:${TC[r.best]};margin-top:.35rem">${r.best}</div>
+    <div style="font-size:.78rem;color:var(--muted);line-height:1.5">${note.replace(/^<br>/,'')}</div>
+   </div>`;
+ document.getElementById('wResult').innerHTML=
+  `<div style="display:flex;gap:.6rem;flex-wrap:wrap">
+    ${cell('tagnow','Your scenario → '+NEXT_YEAR,r1,r1.best===real?'<br>same as the real forecast':'<br><b style=color:#D64550>changed from the real forecast ('+real+')</b>')}
+    <div style="width:1px;background:var(--line,#E4EAF0)"></div>
+    ${cell('tagfc','If it persists → '+TARGET_YEAR,r5,r5.best===r1.best?'<br>holds over five years':'<br><b>drifts to '+r5.best+' longer-term</b>')}
+   </div>`;
+ Plotly.react('wProbs',[
+  {type:'bar',orientation:'h',y:TIERS,x:r1.ord,name:String(NEXT_YEAR),
+   marker:{color:TIERS.map(t=>TC[t])},text:r1.ord.map(p=>Math.round(p*100)+'%'),textposition:'outside'},
+  {type:'bar',orientation:'h',y:TIERS,x:r5.ord,name:String(TARGET_YEAR),
+   marker:{color:TIERS.map(t=>TC[t]),opacity:.45},text:r5.ord.map(p=>Math.round(p*100)+'%'),textposition:'outside'}],
+  {...LAYOUT,barmode:'group',xaxis:{range:[0,1.18],showgrid:false},
+   legend:{orientation:'h',y:1.25},margin:{l:76,r:36,t:8,b:24}},PLOTCFG);}
+function fmtInd(k,v){if(v==null)return '—';
+ return k==='gdp_per_capita'?('$'+Math.round(v).toLocaleString()):(v+(AS.UNIT[k]||''));}
+function drawFore(){const iso=name2iso[wSel.value],F=(AS.FORE||{})[iso]||{};
+ document.getElementById('wForeTitle').textContent='Model forecasts for '+wSel.value;
+ document.getElementById('wForeCards').innerHTML=Object.keys(F).map(k=>{
+  const f=F[k];
+  return `<div class="mini"><div class="t">${AS.NICE[k]||k}</div>
+   <div class="row"><span>Now (${AS.GLOB.latest_year})</span><b>${fmtInd(k,f.now)}</b></div>
+   <div class="row f1"><span>${NEXT_YEAR}</span><b>${fmtInd(k,f.y1yr)}</b></div>
+   <div class="row f5"><span>${TARGET_YEAR}</span><b>${fmtInd(k,f.y5yr)}</b></div></div>`;}).join('')
+  ||'<div class="explain">No indicator forecasts available for this country.</div>';}
+wSel.onchange=()=>{buildSliders();drawFore();};
+document.getElementById('wReset').onclick=buildSliders;
+buildSliders();drawFore();
+</script>
+</body>
+</html>

@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Forecast — AgriSentinel</title>
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=17">
+<script src="plotly.min.js"></script>
+<script src="agrisentinel_data.js"></script>
+<script src="agrisentinel.js?v=17"></script>
+</head>
+<body>
+<script>asNav('forecast.html',false)</script>
+
+<div class="pagehead">
+  <div class="wrap">
+    <div class="eyebrow" style="color:#FFD86B">Machine Learning</div>
+    <h1>Forecast Center</h1>
+    <p><span id="hdYears"></span> — every prediction the system makes, and why.</p>
+    <script>document.getElementById('hdYears').textContent=
+      `Where countries are heading in ${NEXT_YEAR} and ${TARGET_YEAR}`;</script>
+  </div>
+</div>
+
+<section>
+  <div class="wrap">
+    <div class="card rv">
+      <div class="tbar">
+        <span class="tbar-l">Horizon</span>
+        <div class="seg">
+          <button class="hchip on" data-h="1"><span id="hLabel1">Next year</span></button>
+          <button class="hchip fc" data-h="5"><span id="hLabel5">Five years</span></button>
+        </div>
+        <span class="tbar-l" id="mLabel">Model</span>
+        <div class="seg" id="mRow">
+          <button class="mchip on" data-m="rf">Random Forest</button>
+          <button class="mchip" data-m="lr">Logistic Regression</button>
+          <button class="mchip" data-m="dt">Decision Tree</button>
+        </div>
+        <span id="mNote" style="display:none;font-size:.78rem;color:var(--muted)">5-year uses Random Forest only</span>
+        <div class="grow" style="display:flex;gap:.5rem;align-items:center">
+          <input type="text" id="fSearch" placeholder="filter countries…" style="min-width:180px">
+          <button class="chip" id="csvBtn"><script>document.write(icn('download',14))</script> CSV</button>
+        </div>
+      </div>
+      <!-- summary strip on top, full-width table below: the donut had been
+           squeezed into a narrow column with its caption crowding it -->
+      <div id="fWrap" style="display:flex;gap:3rem;align-items:center;flex-wrap:wrap;
+           margin:1.9rem 0 1.7rem;padding-bottom:1.7rem;border-bottom:1px solid var(--line)">
+        <div id="fDonut" style="width:200px;height:200px;flex:none"></div>
+        <div id="fSummary" style="flex:1;min-width:270px"></div>
+      </div>
+      <div class="tablewrap"><table id="fTable"></table></div>
+    </div>
+    <div class="card rv d1" style="margin-top:1.6rem">
+      <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap">
+        <div>
+          <h3 style="font-family:var(--sans);font-size:1.02rem;margin:0" id="oneTitle">Everything forecast for one country</h3>
+          <div style="color:var(--muted);font-size:.84rem;margin-top:.25rem">
+            Risk tier, direction and five indicators — with the reasons behind them.</div>
+        </div>
+        <label style="margin-left:auto;min-width:230px">
+          <span class="ctl-l" style="display:block;margin-bottom:.3rem">Country</span>
+          <select id="iCountry" style="width:100%"></select>
+        </label>
+      </div>
+
+      <!-- verdict + direction on the left, the reasoning on the right: stacking
+           all four blocks in one column left the whole right half of the card empty -->
+      <div style="display:grid;grid-template-columns:minmax(250px,.8fr) minmax(320px,1.2fr);
+                  gap:1rem 3rem;margin-top:2rem" id="oGrid">
+        <div>
+          <div id="oTier"></div>
+          <div id="oDir" style="margin-top:2.4rem"></div>
+        </div>
+        <div id="oWhy"></div>
+      </div>
+    </div>
+
+    <div class="card rv d2" style="margin-top:1.6rem">
+      <h3 style="font-family:var(--sans);font-size:1.02rem;margin:0">Indicator forecasts</h3>
+      <div style="color:var(--muted);font-size:.84rem;margin-top:.25rem;margin-bottom:1.2rem">
+        Each indicator predicted by its own model.</div>
+      <div id="iCards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem"></div>
+      <div style="margin-top:1.6rem">
+        <a class="btn btn-ghost" id="oHistory" href="country.html">&larr; See this country's history</a>
+      </div>
+    </div>
+    <div class="explain rv d2" style="margin-top:1.4rem" id="fFooterNote"></div>
+  </div>
+</section>
+
+<script>asFooter()</script>
+<script>
+document.getElementById('hLabel1').textContent='Next year ('+NEXT_YEAR+')';
+document.getElementById('hLabel5').textContent='Five years ('+TARGET_YEAR+')';
+// split==='test' is REQUIRED: without it find() returns the train row, and the
+// page would report training accuracy as if it were held-out performance.
+const rf1m=AS.METRICS.find(m=>m.horizon==='1yr'&&m.model==='Random Forest'&&m.split==='test');
+const b1m=AS.METRICS.find(m=>m.horizon==='1yr'&&m.model==='Persistence'&&m.split==='test');
+const rf5m=AS.METRICS.find(m=>m.horizon==='5yr'&&m.model==='Random Forest'&&m.split==='test');
+const b5m=AS.METRICS.find(m=>m.horizon==='5yr'&&m.model==='Persistence'&&m.split==='test');
+document.getElementById('fFooterNote').innerHTML=`Measured on years the models never saw:
+ next-year forecasts correct ${Math.round(rf1m.accuracy*100)}%, five-year ${Math.round(rf5m.accuracy*100)}% — and
+ <b>no high-risk country was ever classified low-risk</b>.
+ Full methodology on the <a href="learn.html">Learn page</a>.`;
+
+let fModel='rf',fHorizon='1';
+function dirOf(iso){const D=(fHorizon==='5'?AS.DIR5:AS.DIR)||{};return D[iso]||null;}
+const DIRC={Improving:'#1A9E77',Stable:'var(--muted)',Worsening:'#D64550'};
+const DIRA={Improving:'&darr;',Stable:'&rarr;',Worsening:'&uarr;'};
+function dirCell(iso){const d=dirOf(iso);if(!d)return '<span style="color:var(--muted)">—</span>';
+ return `<span class="dir" style="color:${DIRC[d.d]}"><b>${DIRA[d.d]}</b> ${d.d}</span>`;}
+
+function fRows(){
+ if(fHorizon==='5'){const yr=String(TARGET_YEAR);
+  return ISOs.filter(i=>AS.OUTLOOK[i]&&AS.OUTLOOK[i][yr]).map(i=>({iso:i,n:AS.META[i].n,
+  pou:AS.SERIES[i].pou[AS.SERIES[i].y.indexOf(AS.GLOB.latest_year)],t:AS.OUTLOOK[i][yr].t,c:AS.OUTLOOK[i][yr].c,
+  pH:AS.OUTLOOK[i][yr].t==='High'?AS.OUTLOOK[i][yr].c:0}))
+  .sort((a,b)=>(b.pH||0)-(a.pH||0)||(b.c||0)-(a.c||0));}
+ return ISOs.filter(i=>AS.PRED[i]).map(i=>({iso:i,n:AS.META[i].n,
+  pou:AS.SERIES[i].pou[AS.SERIES[i].y.indexOf(AS.GLOB.latest_year)],...AS.PRED[i][fModel]}))
+  .sort((a,b)=>(b.pH||0)-(a.pH||0));}
+function drawForecast(){const q=(document.getElementById('fSearch').value||'').toLowerCase();
+ const yr=fHorizon==='5'?String(TARGET_YEAR):String(NEXT_YEAR);
+ const rows=fRows().filter(r=>r.n.toLowerCase().includes(q));
+ const cnt={Low:0,Medium:0,High:0};fRows().forEach(r=>cnt[r.t]++);
+ // counts live in the summary bars beside the ring, so the ring itself stays
+ // clean — labels inside it would just repeat them
+ Plotly.react('fDonut',[{type:'pie',hole:.62,labels:TIERS,values:TIERS.map(t=>cnt[t]),
+  marker:{colors:TIERS.map(t=>TC[t]),line:{color:'#fff',width:2}},textinfo:'none',
+  hovertemplate:'%{label}: %{value} countries (%{percent})<extra></extra>',sort:false}],
+  {...LAYOUT,showlegend:false,margin:{l:0,r:0,t:0,b:0}},PLOTCFG);
+ const total=fRows().length;
+ const bar=t=>{const pct=total?Math.round(cnt[t]/total*100):0;
+  return `<div style="display:flex;align-items:center;gap:.8rem;font-size:.88rem">
+    <span style="flex:0 0 66px;color:var(--muted)">${t}</span>
+    <span style="flex:1;height:9px;background:var(--mist);border-radius:999px;overflow:hidden">
+      <span style="display:block;width:${pct}%;height:100%;background:${TC[t]};border-radius:999px"></span></span>
+    <b style="flex:0 0 32px;text-align:right">${cnt[t]}</b>
+    <span style="flex:0 0 40px;text-align:right;color:var(--muted)">${pct}%</span></div>`;};
+ document.getElementById('fSummary').innerHTML=
+  `<div style="font-family:var(--serif);font-size:2.1rem;font-weight:700;line-height:1.05;
+       color:${TC.High}">${cnt.High}<span style="font-family:var(--sans);font-size:1rem;
+       font-weight:600;color:var(--muted)"> of ${total} countries</span></div>
+   <div style="color:var(--muted);font-size:.92rem;margin-top:.3rem">
+     forecast at <b style="color:var(--ink)">serious hunger</b> in ${yr}</div>
+   <div style="margin-top:1.3rem;display:flex;flex-direction:column;gap:.55rem;max-width:400px">
+     ${TIERS.map(bar).join('')}</div>`
+   +(fHorizon==='5'?`<div class="explain" style="margin-top:1.1rem">Five-year forecasts are
+      less certain than next-year — test macro-F1 ${rf5m.macro_f1} vs ${rf1m.macro_f1}.</div>`:'');
+ document.getElementById('fTable').innerHTML=
+  `<thead><tr><th>Country</th><th>Hunger today</th><th>${yr} forecast</th><th>Risk direction</th></tr></thead><tbody>`+
+  rows.map(r=>`<tr><td><b>${r.n}</b></td><td>${r.pou??'—'}%</td>
+   <td><span class="badge" style="background:${TC[r.t]}">${r.t}</span></td>
+   <td>${dirCell(r.iso)}</td></tr>`).join('')+'</tbody>';}
+function setHorizon(h){fHorizon=h;
+ document.querySelectorAll('.hchip').forEach(c=>c.classList.toggle('on',c.dataset.h===h));
+ const five=h==='5';
+ // hide the whole segmented control, not its buttons — an empty track looks broken
+ document.getElementById('mRow').style.display=five?'none':'';
+ document.getElementById('mLabel').style.display=five?'none':'';
+ if(five){fModel='rf';
+  document.querySelectorAll('.mchip').forEach(c=>c.classList.toggle('on',c.dataset.m==='rf'));}
+ document.getElementById('mNote').style.display=five?'':'none';
+ drawForecast();}
+document.querySelectorAll('.hchip').forEach(ch=>ch.onclick=()=>setHorizon(ch.dataset.h));
+document.querySelectorAll('.mchip').forEach(ch=>ch.onclick=()=>{
+ document.querySelectorAll('.mchip').forEach(c=>c.classList.remove('on'));
+ ch.classList.add('on');fModel=ch.dataset.m;drawForecast();});
+document.getElementById('fSearch').oninput=drawForecast;
+document.getElementById('csvBtn').onclick=()=>{const rows=fRows();
+ const yr=fHorizon==='5'?String(TARGET_YEAR):String(NEXT_YEAR);
+ const csv=`Country,HungerToday,Forecast${yr},RiskDirection\n`+
+  rows.map(r=>{const d=dirOf(r.iso);return `"${r.n}",${r.pou},${r.t},${d?d.d:''}`}).join('\n');
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+ a.download=`agrisentinel_forecast_${yr}.csv`;a.click();};
+drawForecast();
+
+const iSel=document.getElementById('iCountry');
+ISOs.filter(i=>AS.FORE&&AS.FORE[i]).map(i=>AS.META[i].n).sort().forEach(n=>{
+ const o=document.createElement('option');o.value=n;o.textContent=n;iSel.appendChild(o);});
+function fmtInd(k,v){if(v==null)return '—';
+ return k==='gdp_per_capita'?('$'+Math.round(v).toLocaleString()):(v+(AS.UNIT[k]||''));}
+function drawIndicators(){const iso=name2iso[iSel.value],F=AS.FORE[iso]||{},nm=AS.META[iso].n;
+ document.getElementById('oneTitle').textContent=`Everything forecast for ${nm}`;
+ document.getElementById('oHistory').href=`country.html?c=${iso}`;
+
+ // ---- 1. risk tier for NEXT_YEAR (tier only — a per-country probability reads
+ //         as model accuracy, which is reported on the Model Lab page instead)
+ const P=AS.PRED[iso];
+ let h='';
+ if(P){
+  // a labelled list, not three boxes: in a half-width column the boxes wrapped
+  // awkwardly, and the three verdicts compare better read down a single line
+  h=`<h3 style="font-family:var(--sans);font-size:.95rem;margin:0 0 .8rem">Risk tier in ${NEXT_YEAR}</h3>`
+   +'<div style="border:1px solid var(--line);border-radius:12px;overflow:hidden">'
+   +[['rf','Random Forest'],['lr','Logistic Regression'],['dt','Decision Tree']].map(([kk,n2],i)=>{
+      const p=P[kk];return `<div style="display:flex;align-items:center;justify-content:space-between;
+        gap:1rem;padding:.7rem 1rem;font-size:.86rem${i?';border-top:1px solid var(--line)':''}">
+        <span style="color:var(--muted)">${n2}</span>
+        <span class="badge" style="background:${TC[p.t]};font-size:.74rem">${p.t}</span></div>`;}).join('')
+   +'</div>';
+  const agree=new Set([P.rf.t,P.lr.t,P.dt.t]).size===1;
+  h+=`<div class="explain" style="margin-top:.9rem">${agree?'All three models agree.'
+      :'The three models <b>disagree</b> — an uncertain case.'}</div>`;
+ } else h=`<div class="explain">No ${AS.GLOB.latest_year} data for ${nm}, so no forecast.</div>`;
+ document.getElementById('oTier').innerHTML=h;
+
+ // ---- 2. why: this country's own SHAP, not the site-wide average
+ const L=(AS.SHAPLOCAL||{})[iso];let w='';
+ if(L&&L.contrib){
+  const rows=Object.entries(L.contrib).slice(0,5);
+  const max=Math.max(...rows.map(([,v])=>Math.abs(v)))||1;
+  // no max-width: this sits in its own column now and should fill it
+  w=`<h3 style="font-family:var(--sans);font-size:.95rem;margin:0 0 .8rem">Why ${NEXT_YEAR} is `
+   +`<span class="badge" style="background:${TC[L.tier]};font-size:.78rem">${L.tier}</span></h3>`
+   +'<div style="display:flex;flex-direction:column;gap:.6rem">'
+   +rows.map(([f,v])=>{const pct=Math.round(Math.abs(v)/max*100),t=v>0;
+     return `<div style="display:flex;align-items:center;gap:.8rem;font-size:.86rem">
+       <div style="flex:0 0 140px;color:var(--muted)">${AS.NICE[f]||f}</div>
+       <div style="flex:1;background:var(--mist);border-radius:999px;height:12px;overflow:hidden">
+         <div style="width:${pct}%;height:100%;background:${t?TC[L.tier]:'#9AA8B5'};border-radius:999px"></div></div>
+       <div style="flex:0 0 74px;text-align:right;font-weight:600;color:${t?'var(--ink)':'var(--muted)'}">
+         ${v>0?'+':''}${v.toFixed(3)}</div></div>`;}).join('')
+   +'</div><div class="explain" style="margin-top:1.1rem">'
+   +`Coloured bars pushed ${nm} <b>toward ${L.tier}</b>; grey bars pushed <b>away</b>. `
+   +'A risk level without its reasons cannot be acted on.</div>';}
+ document.getElementById('oWhy').innerHTML=w;
+
+ // ---- 3. direction of change (arrows always paired with what is moving)
+ const d1=(AS.DIR||{})[iso],d5=(AS.DIR5||{})[iso];let dh='';
+ if(d1||d5){
+  const DC={Improving:'#1A9E77',Stable:'var(--muted)',Worsening:'#D64550'};
+  const DA={Improving:'&darr;',Stable:'&rarr;',Worsening:'&uarr;'};
+  const DS={Improving:'hunger expected to fall',Stable:'little change expected',
+            Worsening:'hunger expected to rise'};
+  // flex:1 so the two cards split the column evenly instead of leaving a gap
+  const cell=(lbl,d,tone)=>d?`<div class="kpi" style="flex:1;min-width:150px${tone}"><div class="l">${lbl}</div>
+    <div class="n" style="font-size:1.2rem;color:${DC[d.d]}">${DA[d.d]} ${d.d}</div>
+    <div style="font-size:.78rem;color:var(--muted);margin-top:.25rem;line-height:1.4">${DS[d.d]}</div></div>`:'';
+  dh='<h3 style="font-family:var(--sans);font-size:.95rem;margin:0 0 .8rem">Direction of change</h3>'
+   +'<div style="display:flex;gap:.9rem;flex-wrap:wrap">'
+   +cell('By '+NEXT_YEAR,d1,';border-top:3px solid var(--blue)')
+   +cell('By '+TARGET_YEAR,d5,';border-top:3px solid var(--violet)')+'</div>';}
+ document.getElementById('oDir').innerHTML=dh;
+
+ // ---- 4. indicator forecasts
+ document.getElementById('iCards').innerHTML=Object.keys(F).map(k=>{
+  const f=F[k];
+  return `<div class="mini"><div class="t">${AS.NICE[k]||k}</div>
+   <div class="row"><span>${AS.GLOB.latest_year} (actual)</span><b>${fmtInd(k,f.now)}</b></div>
+   <div class="row f1"><span>${NEXT_YEAR} forecast</span><b>${fmtInd(k,f.y1yr)}</b></div>
+   <div class="row f5"><span>${TARGET_YEAR} forecast</span><b>${fmtInd(k,f.y5yr)}</b></div></div>`;}).join('');}
+
+iSel.onchange=drawIndicators;
+const qc=new URLSearchParams(location.search).get('c');
+const startCountry=(qc&&AS.META[qc])?AS.META[qc].n
+  :(name2iso['Myanmar']?'Myanmar':iSel.options[0]?.value);
+if(startCountry){iSel.value=startCountry;drawIndicators();}
+</script>
+</body>
+</html>

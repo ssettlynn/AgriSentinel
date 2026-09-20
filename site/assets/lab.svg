@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+<defs>
+<linearGradient id="lbg" x1="0" y1="0" x2="1" y2="1">
+ <stop offset="0" stop-color="#082A47"/><stop offset=".55" stop-color="#0F5FA8"/>
+ <stop offset="1" stop-color="#1A9E77"/>
+</linearGradient>
+<radialGradient id="lglow" cx=".5" cy=".5" r=".5">
+ <stop offset="0" stop-color="#8FE3C6" stop-opacity=".5"/><stop offset="1" stop-color="#8FE3C6" stop-opacity="0"/>
+</radialGradient>
+</defs>
+<rect width="1920" height="1080" fill="url(#lbg)"/>
+<circle cx="1450" cy="260" r="520" fill="url(#lglow)"/>
+<circle cx="380" cy="860" r="420" fill="url(#lglow)" opacity=".6"/>
+<!-- faint grid -->
+<g stroke="#FFFFFF" stroke-opacity=".07" stroke-width="2">
+ <line x1="0" y1="270" x2="1920" y2="270"/><line x1="0" y1="540" x2="1920" y2="540"/>
+ <line x1="0" y1="810" x2="1920" y2="810"/>
+ <line x1="480" y1="0" x2="480" y2="1080"/><line x1="960" y1="0" x2="960" y2="1080"/>
+ <line x1="1440" y1="0" x2="1440" y2="1080"/>
+</g>
+<!-- rising risk curve -->
+<path d="M120 860 C 480 830, 700 640, 960 560 S 1500 380, 1800 250" fill="none"
+ stroke="#FFD86B" stroke-width="14" stroke-linecap="round" opacity=".9"/>
+<path d="M120 900 C 500 880, 760 760, 1020 700 S 1520 560, 1800 470" fill="none"
+ stroke="#8FE3C6" stroke-width="10" stroke-linecap="round" opacity=".55" stroke-dasharray="2 34"/>
+<!-- slider tracks + knobs -->
+<g stroke-linecap="round">
+ <line x1="330" y1="330" x2="900" y2="330" stroke="#FFFFFF" stroke-opacity=".25" stroke-width="16"/>
+ <line x1="330" y1="330" x2="640" y2="330" stroke="#FFD86B" stroke-width="16"/>
+ <circle cx="640" cy="330" r="34" fill="#FFF7E6"/>
+ <line x1="330" y1="460" x2="900" y2="460" stroke="#FFFFFF" stroke-opacity=".25" stroke-width="16"/>
+ <line x1="330" y1="460" x2="480" y2="460" stroke="#8FE3C6" stroke-width="16"/>
+ <circle cx="480" cy="460" r="34" fill="#EAFBF4"/>
+ <line x1="330" y1="590" x2="900" y2="590" stroke="#FFFFFF" stroke-opacity=".25" stroke-width="16"/>
+ <line x1="330" y1="590" x2="790" y2="590" stroke="#F0A8AE" stroke-width="16"/>
+ <circle cx="790" cy="590" r="34" fill="#FDEFF0"/>
+</g>
+<!-- data points on curve -->
+<g fill="#FFFFFF">
+ <circle cx="960" cy="560" r="16" opacity=".9"/>
+ <circle cx="1310" cy="430" r="12" opacity=".7"/>
+ <circle cx="1620" cy="320" r="14" opacity=".8"/>
+</g>
+</svg>

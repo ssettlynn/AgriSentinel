@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="AgriSentinel — an explainable early-warning system predicting national food-security risk 1 and 5 years ahead, from FAOSTAT and World Bank open data.">
+<meta property="og:title" content="AgriSentinel — Explainable Food-Security Early Warning">
+<meta property="og:description" content="Predicting national food-security risk 1 and 5 years ahead from FAOSTAT and World Bank open data — with SHAP explanations and a live in-browser model.">
+<meta property="og:type" content="website">
+<title>AgriSentinel — An Explainable Early-Warning System for National Food-Security Risk</title>
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=17">
+<script src="agrisentinel_data.js"></script>
+<script src="agrisentinel.js?v=17"></script>
+</head>
+<body>
+<script>asNav('index.html',false)</script>
+
+<header class="hero">
+  <img class="hero-img" src="assets/hero.svg" alt="">
+  <div class="hero-inner">
+    <div class="eyebrow" style="color:#FFD86B;margin-bottom:1rem">AgriSentinel · An Explainable Early-Warning System for National Food-Security Risk</div>
+    <h1>Predicting hunger,<br><span class="shimmer">before it happens.</span></h1>
+    <p>Open data from the UN's FAO and the World Bank, machine learning, and honest explanations —
+       explore where food security is heading, country by country.</p>
+    <div class="btns">
+      <a class="btn btn-solid" href="explore.html">Explore the world map</a>
+      <a class="btn btn-ghost" href="lab.html">Try the What-If Lab</a>
+    </div>
+  </div>
+  <div class="scroll-hint"></div>
+</header>
+
+<div class="marquee"><div class="marquee-track">
+ <span>FAOSTAT — FOOD SECURITY INDICATORS</span><span>•</span><span>WORLD BANK OPEN DATA</span><span>•</span>
+ <span>UN SDG 2 — ZERO HUNGER</span><span>•</span><span id="marqueeCountries1"></span><span>•</span>
+ <span>4 MODELS + SHAP EXPLAINABILITY</span><span>•</span>
+ <span>FAOSTAT — FOOD SECURITY INDICATORS</span><span>•</span><span>WORLD BANK OPEN DATA</span><span>•</span>
+ <span>UN SDG 2 — ZERO HUNGER</span><span>•</span><span id="marqueeCountries2"></span><span>•</span>
+ <span>4 MODELS + SHAP EXPLAINABILITY</span><span>•</span>
+</div></div>
+
+<section style="background:var(--mist)">
+  <div class="wrap stats">
+    <div class="stat rv"><div class="num red" id="statHigh" data-count="0">0</div><div class="lab" id="statHighLab">predicted high-risk</div></div>
+    <div class="stat rv d1"><div class="num" id="statCountries" data-count="0">0</div><div class="lab" id="statCountriesLab">countries tracked</div></div>
+    <div class="stat rv d2"><div class="num teal" id="statAgree" data-count="0">0</div><div class="lab">% agreement across three models</div></div>
+    <div class="stat rv d3"><div class="num amber" id="statObs" data-count="0">0</div><div class="lab">country-year observations</div></div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="center rv">
+      <div class="eyebrow">Start Exploring</div>
+      <h2>Four ways into the data</h2>
+      <p>Each section is its own page — pick where to begin.</p>
+    </div>
+    <div class="grid4">
+      <a class="feature rv" href="explore.html">
+        <div class="art"><img src="assets/earth.svg" alt=""></div>
+        <div class="body"><b>World Map</b>
+          <span>An animated world map of over a decade of hunger, plus 2024 and 2028 forecasts.</span>
+          <em class="go">Explore →</em></div></a>
+      <a class="feature rv d1" href="forecast.html">
+        <div class="art"><img src="assets/hero.svg" alt=""></div>
+        <div class="body"><b id="featForecastTitle">Forecast</b>
+          <span>Every forecast, sortable — next year and five years ahead.</span>
+          <em class="go">See forecasts →</em></div></a>
+      <a class="feature rv d2" href="lab.html">
+        <div class="art"><img src="assets/lab.svg" alt=""></div>
+        <div class="body"><b>What-If Lab</b>
+          <span>Live models in your browser — change conditions, watch risk shift.</span>
+          <em class="go">Run a scenario →</em></div></a>
+      <a class="feature rv d3" href="country.html">
+        <div class="art"><img src="assets/market.svg" alt=""></div>
+        <div class="body"><b>Country Story</b>
+          <span>Search any country: its journey, its outlook, and why.</span>
+          <em class="go">Find a country →</em></div></a>
+    </div>
+  </div>
+</section>
+
+<div class="band">
+  <img src="assets/market.svg" alt="">
+  <div class="q rv">
+    <h2>"Behind every percentage point are millions of families deciding which meal to skip."</h2>
+    <p>The <span id="shockYear"></span> price shock pushed <span id="shockCount"></span> countries into high risk. Most of them saw it coming — in the data.</p>
+  </div>
+</div>
+
+<section>
+  <div class="wrap">
+    <div class="center rv">
+      <div class="eyebrow">The Scale</div>
+      <h2>Three tiers, defined by the UN FAO</h2>
+      <p>Every country-year is scored on official undernourishment bands.</p>
+    </div>
+    <div class="tiers">
+      <div class="tier rv" style="--tint:#1A9E77">
+        <span class="tb">Low</span><div class="tnum">&lt;5%</div>
+        <p>Food access broadly secure; monitoring continues.</p></div>
+      <div class="tier rv d1" style="--tint:#E6A817">
+        <span class="tb">Medium</span><div class="tnum">5–15%</div>
+        <p>Vulnerable to shocks — where early action is cheapest and most effective.</p></div>
+      <div class="tier rv d2" style="--tint:#D64550">
+        <span class="tb">High</span><div class="tnum">15%+</div>
+        <p>Concentrated in Sub-Saharan Africa and crisis-affected states.</p></div>
+    </div>
+  </div>
+</section>
+
+<section style="background:var(--mist);padding-bottom:6.5rem">
+  <div class="wrap center rv" style="margin-bottom:0">
+    <div class="eyebrow">Ready?</div>
+    <h2>See where the world is heading</h2>
+    <p style="margin-bottom:2rem">Over a decade of data, four models, explained predictions.</p>
+    <a class="btn btn-blue" href="explore.html">Start with the world map →</a>
+  </div>
+</section>
+
+<script>asFooter()</script>
+<script>
+(function(){
+  var s = AS.HOMESTATS;
+  document.getElementById('statHigh').dataset.count = s.high_next_year;
+  document.getElementById('statHighLab').textContent = 'predicted high-risk in '+NEXT_YEAR;
+  document.getElementById('statCountries').dataset.count = s.countries;
+  document.getElementById('statCountriesLab').textContent = 'countries tracked, '+AS.GLOB.years[0]+'–'+AS.GLOB.latest_year;
+  document.getElementById('statAgree').dataset.count = s.agree_pct;
+  document.getElementById('statObs').dataset.count = s.obs;
+  var mtxt = s.countries + ' COUNTRIES · ' + AS.GLOB.years[0] + '–' + AS.GLOB.latest_year;
+  document.getElementById('marqueeCountries1').textContent = mtxt;
+  document.getElementById('marqueeCountries2').textContent = mtxt;
+  document.getElementById('shockYear').textContent = s.high_recent_shock_year.year;
+  document.getElementById('shockCount').textContent = s.high_recent_shock_year.count;
+  document.getElementById('featForecastTitle').textContent = 'Forecast ' + NEXT_YEAR + '–' + TARGET_YEAR;
+})();
+</script>
+</body>
+</html>

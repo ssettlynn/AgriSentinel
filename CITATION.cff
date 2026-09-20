@@ -1,0 +1,30 @@
+cff-version: 1.2.0
+title: "AgriSentinel: An Explainable Early-Warning System for National Food-Security Risk"
+message: "If you use this software or its results, please cite it as below."
+type: software
+authors:
+  - given-names: "Soe Sett"
+    family-names: "Lynn"
+    affiliation: "University of Computer Studies (Yangon)"
+repository-code: "https://github.com/ssettlynn/AgriSentinel"
+url: "https://predictagrisentinel.netlify.app/"
+abstract: >-
+  AgriSentinel classifies every country into a Low / Medium / High food-security
+  risk tier at one-year and five-year horizons, and explains each prediction with
+  SHAP. It combines FAOSTAT food-security indicators with World Bank economic
+  indicators for 180 countries over 2010-2023, using a strictly chronological
+  train / validation / test split so no future information can leak into the past.
+  Because a missed High-risk country costs more than a false alarm, models are
+  compared on the F-beta score (beta = 2) alongside macro-F1, and the
+  misclassification cost is varied explicitly through a class-weight sweep.
+keywords:
+  - food security
+  - early warning
+  - explainable machine learning
+  - SHAP
+  - FAOSTAT
+  - World Bank
+  - data mining
+license: MIT
+version: "1.1.0"
+date-released: "2026-09-20"
